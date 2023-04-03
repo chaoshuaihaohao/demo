@@ -1,0 +1,1 @@
+cmd_/home/hao/demo/iomem/iomem_resource.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/hao/demo/iomem/iomem_resource.ko /home/hao/demo/iomem/iomem_resource.o /home/hao/demo/iomem/iomem_resource.mod.o;  true

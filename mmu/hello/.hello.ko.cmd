@@ -1,0 +1,1 @@
+cmd_/home/hao/demo/mmu/hello/hello.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/hao/demo/mmu/hello/hello.ko /home/hao/demo/mmu/hello/hello.o /home/hao/demo/mmu/hello/hello.mod.o;  true

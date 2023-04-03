@@ -1,0 +1,13 @@
+{
+	"net_domain":	{
+		"domain":	"AF_UNIX"
+	},
+	"net_type":	{
+		"type":	"SOCK_STREAM"
+	},
+	"net_protocol":	{
+		"protocol":	"0"
+	},
+	"recv_func":	"RECVMSG",
+	"send_func":	"SENDMSG"
+}
