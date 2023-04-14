@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
+#include <netinet/in.h>
 
 #include <errno.h>
 
@@ -16,13 +17,15 @@ static struct network np;
 
 
 static int sock;
-struct sockaddr_un serv;
+struct sockaddr_un serv_un; //AF_UNIX\AF_LOCAL
+struct sockaddr_in serv_in; //AF_INET
 
 /* send global varibles */
 static send_handler_t *send_handler;
 static char send_buf[BUFSIZ];
 static int send_flags = 0;
 const struct sockaddr_un dest_addr_un;
+const struct sockaddr_in dest_addr_in;
 static socklen_t dest_addrlen;
 
 static struct msghdr send_msg;
@@ -146,28 +149,28 @@ int main()
 		return -1;
 	}
 
-	const char *filepath = "/tmp/local_sock";
-	// if(access(filepath, F_OK) == 0){
-	//     unlink(filepath);
-	// }
-	/*  确保UNIX_DOMA un_FILE所指向的文件存在且可写，否则退出 */
-	if (access(filepath, F_OK | W_OK) < 0) {
-		perror("has no access to socket file.");
-		exit(-1);
-	}
-
-	//serv.sun_family = AF_LOCAL;
-	//strcpy(serv.sun_path, filepath);
-
 	switch (np.net_domain.domain) {
 	case AF_UNIX || AF_LOCAL:
-		serv.sun_family = AF_LOCAL;
-		strcpy(serv.sun_path, filepath);
+		const char *filepath = "/tmp/local_sock";
+		// if(access(filepath, F_OK) == 0){
+		//     unlink(filepath);
+		// }
+		/*  确保UNIX_DOMA un_FILE所指向的文件存在且可写，否则退出 */
+		if (access(filepath, F_OK | W_OK) < 0) {
+			perror("has no access to socket file.");
+			exit(-1);
+		}
+
+		//serv_un.sun_family = AF_LOCAL;
+		//strcpy(serv_un.sun_path, filepath);
+
+		serv_un.sun_family = AF_LOCAL;
+		strcpy(serv_un.sun_path, filepath);
 		switch (np.net_type.type) {
 		case SOCK_STREAM:
 			if (connect
-			    (sock, (struct sockaddr *)&serv,
-			     SUN_LEN(&serv)) < 0) {
+			    (sock, (struct sockaddr *)&serv_un,
+			     SUN_LEN(&serv_un)) < 0) {
 				perror("connect socket failed");
 				return -1;
 			}
@@ -183,9 +186,9 @@ int main()
 		case SOCK_DGRAM:
 #if 0
 #define USE_TCP			// udp有问题
-			serv.sun_family = AF_LOCAL;
-			strcpy(serv.sun_path, filepath);
-			if (bind(sock, (struct sockaddr *)&serv, sizeof(serv)) <
+			serv_un.sun_family = AF_LOCAL;
+			strcpy(serv_un.sun_path, filepath);
+			if (bind(sock, (struct sockaddr *)&serv_un, sizeof(serv_un)) <
 			    0) {
 				perror("bind socket failed");
 				return -1;
@@ -203,6 +206,63 @@ int main()
 		default:
 			break;
 		};
+		break;
+	case AF_INET:
+		//serv_un.sun_family = AF_LOCAL;
+		//strcpy(serv_un.sun_path, filepath);
+		serv_in.sin_family = AF_INET;
+		#define PORT 8080
+		serv_in.sin_port = htons(PORT);
+		// Convert IPv4 and IPv6 addresses from text to binary
+		// form
+		if (inet_pton(AF_INET, "127.0.0.1", &serv_in.sin_addr)
+		<= 0) {
+			printf("\nInvalid address/ Address not supported \n");
+			return -1;
+		}
+
+		switch (np.net_type.type) {
+		case SOCK_STREAM:
+			if (connect
+			    (sock, (struct sockaddr *)&serv_in,
+			     sizeof(serv_in)) < 0) {
+				perror("connect socket failed");
+				return -1;
+			}
+
+			while (1) {
+				/* do_client_send */
+				do_client_send(sock);
+
+				do_client_recv(sock);
+
+			}
+			break;
+		case SOCK_DGRAM:
+#if 0
+#define USE_TCP			// udp有问题
+			serv_un.sun_family = AF_LOCAL;
+			strcpy(serv_un.sun_path, filepath);
+			if (bind(sock, (struct sockaddr *)&serv_un, sizeof(serv_un)) <
+			    0) {
+				perror("bind socket failed");
+				return -1;
+			}
+#endif
+			while (1) {
+				/* do_client_send */
+				do_client_send(sock);
+
+				do_client_recv(sock);
+
+			}
+
+			break;
+		default:
+			break;
+		};
+		break;
+
 	default:
 		break;
 	};

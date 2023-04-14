@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <netinet/in.h> //AF_INET
 #include <unistd.h>
 
 #include "network.h"
@@ -34,6 +35,7 @@ static struct iovec recv_iov[1];
 
 static int recv_flags = 0;
 static struct sockaddr_un src_addr_un;
+static struct sockaddr_in src_addr_in;
 static socklen_t src_addrlen;
 int do_recv(int sockfd)
 {
@@ -93,6 +95,8 @@ static int send_flags = 0;
 const struct sockaddr_un dest_addr_un;
 static socklen_t dest_addrlen;
 
+const struct sockaddr_in dest_addr_in;
+
 int do_send(int sockfd)
 {
 	switch (np.send_func) {
@@ -114,7 +118,8 @@ int do_send(int sockfd)
 	};
 
 	/* Input send message */
-	strcpy(send_buf, "hello world");
+//	strcpy(send_buf, "hello world");
+	strcpy(send_buf, recv_buf);
 
 	//----------------
 	send_iov[0].iov_base = send_buf;
@@ -149,6 +154,8 @@ int main()
 		perror("create socket failed");
 		return -1;
 	}
+	
+	//TODO:add socketopt
 
 	switch (np.net_domain.domain) {
 	case AF_UNIX || AF_LOCAL:
@@ -223,6 +230,81 @@ int main()
 
 		break;
 	case AF_INET:
+		struct sockaddr_in src_addr_in;
+
+#if 0
+		// Forcefully attaching socket to the port 8080
+		if (setsockopt(server_fd, SOL_SOCKET,
+			SO_REUSEADDR | SO_REUSEPORT, &opt,
+			sizeof(opt))) {
+			perror("setsockopt");
+			exit(EXIT_FAILURE);
+		}
+#endif
+		src_addr_in.sin_family = AF_INET;
+		src_addr_in.sin_addr.s_addr = INADDR_ANY; //all ip addr
+		#define PORT 8080
+		src_addr_in.sin_port = htons(PORT);
+
+		// bind    
+		if (bind
+		    (sock, (struct sockaddr *)&src_addr_in,
+		     sizeof(src_addr_in)) < 0) {
+			perror("bind socket failed");
+			return -1;
+		}
+
+		switch (np.net_type.type) {
+		case SOCK_STREAM:
+			// listen
+			if (listen(sock, 0) < 0) {
+				perror("listen socket failed");
+				return -1;
+			}
+
+			while (1) {
+				sockfd = accept(sock, (struct sockaddr *)
+						&dest_addr_in, &dest_addrlen);
+				if (sockfd < 0) {
+					perror("accept socket failed");
+					return -1;
+				} else if (sockfd == 0) {
+					perror("accept socket failed");
+					return -1;
+				}
+
+				while (1) {
+					/* Do recv */
+					do_recv(sockfd);
+
+					/* handle recv msg */
+					do_service();
+
+					/* Send handled msg reply */
+					do_send(sockfd);
+				}
+
+				close(sockfd);
+			}
+
+			break;
+		case SOCK_DGRAM:
+			while (1) {
+				/* Do recv */
+				do_recv(sock);
+
+				/* handle recv msg */
+				do_service();
+
+				/* Send handled msg reply */
+				do_send(sock);
+			}
+
+			break;
+		default:
+			perror("Not support type.");
+			exit(-1);
+		};
 		break;
 
 	default:

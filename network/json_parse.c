@@ -8,11 +8,13 @@
 #include "cJSON.h"
 #include "network.h"
 
+#if 0
 domain[] = {
 {},
 {},
 {},
 };
+#endif
 
 int parse_json(struct network *np)
 {
@@ -73,6 +75,9 @@ int parse_json(struct network *np)
 		printf("np->net_domain.domain = %d\n", np->net_domain.domain);
 	} else if (!strcmp(domain, "AF_LOCAL")) {
 		np->net_domain.domain = AF_LOCAL;
+		printf("np->net_domain.domain = %d\n", np->net_domain.domain);
+	} else if (!strcmp(domain, "AF_INET")) {
+		np->net_domain.domain = AF_INET;
 		printf("np->net_domain.domain = %d\n", np->net_domain.domain);
 	} else {
 		printf("Error: Not support domain.\n");
