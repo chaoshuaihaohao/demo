@@ -119,7 +119,7 @@ int do_send(int sockfd)
 
 	/* Input send message */
 //	strcpy(send_buf, "hello world");
-	strcpy(send_buf, recv_buf);
+	strncpy(send_buf, recv_buf, strlen(recv_buf));
 
 	//----------------
 	send_iov[0].iov_base = send_buf;

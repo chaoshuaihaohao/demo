@@ -1,6 +1,6 @@
 {
 	"net_domain":	{
-		"domain":	"AF_INET"
+		"domain":	"AF_UNIX"
 	},
 	"net_type":	{
 		"type":	"SOCK_STREAM"
