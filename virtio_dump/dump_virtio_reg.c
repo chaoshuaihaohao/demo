@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -19,12 +20,39 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+//assert failed but not exit if define PASS_DEBUG
+#define PASS_DEBUG
+
+//write back check
+void write_back_check(int expression)
+{
+	if (!expression) {
+		fprintf(stderr,
+			"Assertion failed: Regs write back check failed\n");
+#ifndef PASS_DEBUG
+		exit(EXIT_FAILURE);
+#endif
+	}
+}
+
+void assert_with_logging(int expression, const char *msg)
+{
+	if (!expression) {
+		fprintf(stderr, "Assertion failed: %s\n", msg);
+#ifndef PASS_DEBUG
+		exit(EXIT_FAILURE);
+#endif
+	}
+}
+
 #define VFIO_PATH "/dev/vfio/vfio"
 #define DEVICE_ID "0000:60:00.3"	//The pci BDF of the device taken over by vfio.
 
 #define BIT(nr)                 (1UL << (nr))
+
+#define VIRTNET_FEATURES	(~0UL)
 /*copy from virtio_net.c line 3180*/
-#define VIRTNET_FEATURES \
+//#define VIRTNET_FEATURES \
         BIT(VIRTIO_NET_F_CSUM) | BIT(VIRTIO_NET_F_GUEST_CSUM) | \
         BIT(VIRTIO_NET_F_MAC) | \
         BIT(VIRTIO_NET_F_HOST_TSO4) | BIT(VIRTIO_NET_F_HOST_UFO) | BIT(VIRTIO_NET_F_HOST_TSO6) | \
@@ -35,7 +63,9 @@
         BIT(VIRTIO_NET_F_GUEST_ANNOUNCE) | BIT(VIRTIO_NET_F_MQ) | \
         BIT(VIRTIO_NET_F_CTRL_MAC_ADDR) | \
         BIT(VIRTIO_NET_F_MTU) | BIT(VIRTIO_NET_F_CTRL_GUEST_OFFLOADS) | \
-        BIT(VIRTIO_NET_F_SPEED_DUPLEX) | BIT(VIRTIO_NET_F_STANDBY)
+        BIT(VIRTIO_NET_F_SPEED_DUPLEX) | BIT(VIRTIO_NET_F_STANDBY) | \
+	BIT(VIRTIO_F_VERSION_1) | \
+	BIT(VIRTIO_F_SR_IOV)
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -69,7 +99,7 @@ struct vdpa_bar_info {
 struct pci_device {
 	struct vfio vfio;
 	char config[4096];
-	void *mem_resource[6];		/* copy of bar space date */
+	void *mem_resource[6];	/* copy of bar space date */
 	struct vfio_region_info reg[6];	/* bar space info */
 
 	struct vdpa_bar_info vdpa;
@@ -79,128 +109,224 @@ struct pci_device {
 #define VFIO_GET_REGION_ADDR(x) ((uint64_t) x << 40ULL)
 
 static int pci_vfio_read_config(struct pci_device *pdev,
-                    void *buf, size_t len, off_t offs)
+				void *buf, size_t len, off_t offs)
 {
-        return pread(pdev->vfio.device, buf, len,
-               VFIO_GET_REGION_ADDR(VFIO_PCI_CONFIG_REGION_INDEX) + offs);
+	return pread(pdev->vfio.device, buf, len,
+		     VFIO_GET_REGION_ADDR(VFIO_PCI_CONFIG_REGION_INDEX) + offs);
 }
 
 #define TEST_BIT(a, b)  (b & (1ULL << a))
 
-static void check_host_feature(uint64_t host_features)
+static void check_host_feature(uint64_t host_features, char *msg)
 {
-	printf("%s: features = %lx\n", __func__, host_features);
+	printf("\n-----  Dump %s begin  -----\n", msg);
+	printf("%s: features = 0x%016lx\n", __func__, host_features);
 /* Bit(0~31)*/
-	printf("VIRTIO_NET_F_CSUM:[%s]\n", TEST_BIT(0, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_CSUM:[%s]\n", TEST_BIT(1, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_GUEST_OFFLOADS:[%s]\n", TEST_BIT(2, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_MTU:[%s]\n", TEST_BIT(3, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_MAC:[%s]\n", TEST_BIT(5, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_TSO4:[%s]\n", TEST_BIT(7, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_TSO6:[%s]\n", TEST_BIT(8, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_ECN:[%s]\n", TEST_BIT(9, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_UFO:[%s]\n", TEST_BIT(10, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_HOST_TSO4:[%s]\n", TEST_BIT(11, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_HOST_TSO6:[%s]\n", TEST_BIT(12, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_HOST_ECN:[%s]\n", TEST_BIT(13, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_HOST_UFO:[%s]\n", TEST_BIT(14, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_MRG_RXBUF:[%s]\n", TEST_BIT(15, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_STATUS:[%s]\n", TEST_BIT(16, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_VQ:[%s]\n", TEST_BIT(17, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_RX:[%s]\n", TEST_BIT(18, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_VLAN:[%s]\n", TEST_BIT(19, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_RX_EXTRA:[%s]\n", TEST_BIT(20, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_GUEST_ANNOUNCE:[%s]\n", TEST_BIT(21, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_MQ:[%s]\n", TEST_BIT(22, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_CTRL_MAC_ADDR:[%s]\n", TEST_BIT(23, host_features) ? "Yes":"No");
+	printf("VIRTIO_NET_F_CSUM:[%s]\n",
+	       TEST_BIT(0, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_CSUM:[%s]\n",
+	       TEST_BIT(1, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_GUEST_OFFLOADS:[%s]\n",
+	       TEST_BIT(2, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_MTU:[%s]\n",
+	       TEST_BIT(3, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_MAC:[%s]\n",
+	       TEST_BIT(5, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_TSO4:[%s]\n",
+	       TEST_BIT(7, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_TSO6:[%s]\n",
+	       TEST_BIT(8, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_ECN:[%s]\n",
+	       TEST_BIT(9, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_UFO:[%s]\n",
+	       TEST_BIT(10, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_HOST_TSO4:[%s]\n",
+	       TEST_BIT(11, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_HOST_TSO6:[%s]\n",
+	       TEST_BIT(12, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_HOST_ECN:[%s]\n",
+	       TEST_BIT(13, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_HOST_UFO:[%s]\n",
+	       TEST_BIT(14, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_MRG_RXBUF:[%s]\n",
+	       TEST_BIT(15, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_STATUS:[%s]\n",
+	       TEST_BIT(16, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_VQ:[%s]\n",
+	       TEST_BIT(17, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_RX:[%s]\n",
+	       TEST_BIT(18, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_VLAN:[%s]\n",
+	       TEST_BIT(19, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_RX_EXTRA:[%s]\n",
+	       TEST_BIT(20, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_GUEST_ANNOUNCE:[%s]\n",
+	       TEST_BIT(21, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_MQ:[%s]\n",
+	       TEST_BIT(22, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_CTRL_MAC_ADDR:[%s]\n",
+	       TEST_BIT(23, host_features) ? "Yes" : "No");
 
 /* Bit(32~63)*/
-	printf("VIRTIO_F_VERSION_1:[%s]\n", TEST_BIT(32, host_features) ? "Yes":"No");
-	printf("VIRTIO_F_IOMMU_PLATFORM:[%s]\n", TEST_BIT(33, host_features) ? "Yes":"No");
-	printf("VIRTIO_F_SR_IOV:[%s]\n", TEST_BIT(37, host_features) ? "Yes":"No");
-	printf("VIRTIO_F_RING_RESET:[%s]\n", TEST_BIT(40, host_features) ? "Yes":"No");
-	printf("VIRTIO_F_ADMIN_VQ:[%s]\n", TEST_BIT(41, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_NOTF_COAL:[%s]\n", TEST_BIT(53, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_HASH_REPORT:[%s]\n", TEST_BIT(57, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_RSS:[%s]\n", TEST_BIT(60, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_RSC_EXT:[%s]\n", TEST_BIT(61, host_features) ? "Yes":"No");
-	printf("VIRTIO_NET_F_STANDBY:[%s]\n", TEST_BIT(62, host_features) ? "Yes":"No");
+	printf("VIRTIO_F_VERSION_1:[%s]\n",
+	       TEST_BIT(32, host_features) ? "Yes" : "No");
+	printf("VIRTIO_F_IOMMU_PLATFORM:[%s]\n",
+	       TEST_BIT(33, host_features) ? "Yes" : "No");
+	printf("VIRTIO_F_SR_IOV:[%s]\n",
+	       TEST_BIT(37, host_features) ? "Yes" : "No");
+	printf("VIRTIO_F_RING_RESET:[%s]\n",
+	       TEST_BIT(40, host_features) ? "Yes" : "No");
+	printf("VIRTIO_F_ADMIN_VQ:[%s]\n",
+	       TEST_BIT(41, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_NOTF_COAL:[%s]\n",
+	       TEST_BIT(53, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_HASH_REPORT:[%s]\n",
+	       TEST_BIT(57, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_RSS:[%s]\n",
+	       TEST_BIT(60, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_RSC_EXT:[%s]\n",
+	       TEST_BIT(61, host_features) ? "Yes" : "No");
+	printf("VIRTIO_NET_F_STANDBY:[%s]\n",
+	       TEST_BIT(62, host_features) ? "Yes" : "No");
+	printf("-----  Dump %s end  -----\n\n", msg);
 }
 
 static void show_common_region(struct pci_device *pdev)
 {
-	printf("Dump VIRTIO_PCI_CAP_COMMON_CFG info:\n");
+	printf
+	    ("\n>>>>>>>>>>  Dump VIRTIO_PCI_CAP_COMMON_CFG Info begin  ----------\n");
 
 	struct virtio_pci_common_cfg *cfg;
 	uint64_t host_features = 0, guest_features = VIRTNET_FEATURES;
-	
+
 	cfg = pdev->vdpa.common_base;
+	printf("common base = %p\n", cfg);
+
+#if 0  //reset test
+	cfg->device_status = 0;
+	while (cfg->device_status)
+		usleep(1000);
+	assert_with_logging(cfg->device_status == 0,
+			    "Reset device_status need to be Zero!");
+#endif
 
 	cfg->device_feature_select = 0;
-	printf("device_feature_select = 0x%08x\n", cfg->device_feature_select);
-	printf("device_feature = 0x%08x\n", cfg->device_feature);
-
+	assert_with_logging(cfg->device_feature_select == 0,
+			    "cfg->device_feature_select not set to 0, write back check failed");
+	printf("device_feature_select %u: device_feature_lo = 0x%08x\n",
+	       cfg->device_feature_select, cfg->device_feature);
 	host_features |= cfg->device_feature;
 
 	cfg->device_feature_select = 1;
-	printf("device_feature_select 1 = 0x%08x\n", cfg->device_feature_select);
-	printf("device_feature 1 = 0x%08x\n", cfg->device_feature);
-	host_features |= (uint64_t)cfg->device_feature << 32;
+	assert_with_logging(cfg->device_feature_select == 1,
+			    "cfg->device_feature_select not set to 1, write back check failed");
+	printf("device_feature_select %u: device_feature_hi = 0x%08x\n",
+	       cfg->device_feature_select, cfg->device_feature);
+	host_features |= (uint64_t) cfg->device_feature << 32;
+	assert_with_logging(host_features != 0,
+			    "device_features cannot be Zero, is the device regs config error? or the device not support 8/16/32 bits addressing?");
+
+	check_host_feature(host_features, "device support features");
 
 	/* Negosiate guest features */
 	guest_features &= host_features;
-	printf("Device init host features:\n");
-	check_host_feature(host_features);
-	
-	/* Driver write negosiated features info guest_feature */
-	printf("Driver write negosiated features info guest_feature\n");
-	cfg->guest_feature_select = 0;
-	cfg->guest_feature = (uint32_t)guest_features;
-	printf("guest_feature_select:\t0x%08x\n", cfg->guest_feature_select);
-	printf("guest_feature:\t0x%08x\n", cfg->guest_feature);
-	guest_features = cfg->guest_feature;
-	
-	cfg->guest_feature_select = 1;
-	cfg->guest_feature = (uint32_t)(guest_features >> 32);
-	printf("guest_feature_select 1:\t0x%08x\n",
-	       cfg->guest_feature_select);
-	printf("guest_feature 1:\t0x%08x\n", cfg->guest_feature);
-	guest_features |= (uint64_t)cfg->guest_feature << 32;
-	
-	printf("Device and driver negosiated features:\n");
-	check_host_feature(guest_features);
 
-	printf("msix_config:\t0x%04x\n", cfg->msix_config);
-	printf("num_queues:\t0x%04x\n", cfg->num_queues);
-	printf("device_status:\t0x%02x\n", cfg->device_status);
-	printf("config_generation:\t0x%02x\n", cfg->config_generation);
+	/* Driver write negosiated features info guest_feature */
+//      printf("Driver write negosiated features info guest_feature\n");
+	cfg->guest_feature_select = 0;
+	assert_with_logging(cfg->guest_feature_select == 0,
+			    "cfg->guest_feature_select not set to 0, write back check failed");
+	cfg->guest_feature = (uint32_t) guest_features;
+	assert_with_logging(cfg->guest_feature == (uint32_t) guest_features,
+			    "cfg->guest_feature_lo write back check failed");
+	printf("guest_feature_select %u: guest_feature_lo = 0x%08x\n",
+	       cfg->guest_feature_select, cfg->guest_feature);
+	u64 tmp_features = cfg->guest_feature;
+
+	cfg->guest_feature_select = 1;
+	assert_with_logging(cfg->guest_feature_select == 1,
+			    "cfg->guest_feature_select not set to 1, write back check failed");
+	cfg->guest_feature = (uint32_t) (guest_features >> 32);
+	assert_with_logging(cfg->guest_feature ==
+			    (uint32_t) (guest_features >> 32),
+			    "cfg->guest_feature_hi write back check failed");
+	printf("guest_feature_select %u: guest_feature_hi = 0x%08x\n",
+	       cfg->guest_feature_select, cfg->guest_feature);
+	tmp_features |= (uint64_t) cfg->guest_feature << 32;
+
+	check_host_feature(tmp_features, "Negosiated features");
+
+#if 0
+	cfg->device_status |=
+	    (BIT(VIRTIO_CONFIG_S_ACKNOWLEDGE) | BIT(VIRTIO_CONFIG_S_DRIVER) |
+	     BIT(VIRTIO_CONFIG_S_DRIVER_OK) | BIT(VIRTIO_CONFIG_S_FEATURES_OK));
+	if (cfg->device_status & BIT(VIRTIO_CONFIG_S_ACKNOWLEDGE))
+		printf("device status: VIRTIO_CONFIG_S_ACKNOWLEDGE\n");
+	if (cfg->device_status & BIT(VIRTIO_CONFIG_S_DRIVER))
+		printf("device status: VIRTIO_CONFIG_S_DRIVER\n");
+	if (cfg->device_status & BIT(VIRTIO_CONFIG_S_DRIVER_OK))
+		printf("device status: VIRTIO_CONFIG_S_DRIVER_OK\n");
+	if (cfg->device_status & BIT(VIRTIO_CONFIG_S_FEATURES_OK))
+		printf("device status: VIRTIO_CONFIG_S_FEATURES_OK\n");
+	if (cfg->device_status & VIRTIO_CONFIG_S_NEEDS_RESET)
+		printf("device status: VIRTIO_CONFIG_S_NEEDS_RESET\n");
+	if (cfg->device_status & VIRTIO_CONFIG_S_FAILED)
+		printf("device status: VIRTIO_CONFIG_S_FAILED\n");
+	assert_with_logging(cfg->device_status != 0,
+			    "device_status cannot be Zero!");
+	printf
+	    ("Test case assigned device_status, so don't care it is not equal to kernel driver read\n");
+#endif
+
+	printf("\
+|-------------------------------------------------|---------------------------------------------------|\n\
+|    num_queues:(RO for driver):0x%04x            |             msix_config:(RW):0x%04x               |+010h\n\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|-------------------------------------------------|cfg_generation:(RO):0x%02x | device_status:(RW):0x%02x |+014h\n\
+|-------------------------------------------------|-------------------------|-------------------------|\n", cfg->num_queues, cfg->msix_config, cfg->config_generation, cfg->device_status);
+
+	assert_with_logging(cfg->num_queues != 0,
+			    "cfg->num_queues cannot be Zero, is the device regs config error? or the device not support 8/16/32 bits addressing?");
 
 	for (int qid = 0; qid < cfg->num_queues; qid++) {
-//	for (uint16_t qid = 0; qid < 4; qid++) {
+//      for (uint16_t qid = 0; qid < 4; qid++) {
 		cfg->queue_select = qid;
-		printf("queue %u:>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n", qid);
-		printf("queue_select:\t%u\n", cfg->queue_select);
-		printf("queue_size:\t%u\n", cfg->queue_size);
-		printf("queue_msix_vector:\t0x%04x\n",
-		       cfg->queue_msix_vector);
-		printf("queue_enable:\t0x%04x\n", cfg->queue_enable);
-		printf("queue_notify_off:\t0x%04x\n",
-		       cfg->queue_notify_off);
-		printf("queue_desc_lo:\t0x%08x\n", cfg->queue_desc_lo);
-		printf("queue_desc_hi:\t0x%08x\n", cfg->queue_desc_hi);
-		printf("queue_avail_lo:\t0x%08x\n",
-		       cfg->queue_avail_lo);
-		printf("queue_avail_hi:\t0x%08x\n",
-		       cfg->queue_avail_hi);
-		printf("queue_used_lo:\t0x%08x\n", cfg->queue_used_lo);
-		printf("queue_used_hi:\t0x%08x\n", cfg->queue_used_hi);
+		assert_with_logging(qid == cfg->queue_select,
+				    "queue select not equal qid!");
+		printf("\n-----  Dump queue %u Info begin  -----\n",
+		       cfg->queue_select);
+		printf("\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|    queue_select:(RW):0x%04x                     |-------------------------|-------------------------|+014h\n\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|         queue_msix_vector:(RW):0x%04x           |            queue_size:(RW):0x%04x                 |+018h\n\
+|-------------------------------------------------|---------------------------------------------------|\n\
+|         queue_notify_off:(RO):0x%04x            |          queue_enable:(RW):0x%04x                 |+01Ch\n\
+|-------------------------------------------------|---------------------------------------------------|\n\
+|                                     queue_desc_lo: 0x%08x                                       |+020h\n\
+|-----------------------------------------------------------------------------------------------------|\n\
+|                                     queue_desc_hi: 0x%08x                                       |+024h\n\
+|-----------------------------------------------------------------------------------------------------|\n\
+|                                     queue_avail_lo: 0x%08x                                      |+028h\n\
+|-----------------------------------------------------------------------------------------------------|\n\
+|                                     queue_avail_hi: 0x%08x                                      |+02Ch\n\
+|-----------------------------------------------------------------------------------------------------|\n\
+|                                     queue_used_lo: 0x%08x                                       |+030h\n\
+|-----------------------------------------------------------------------------------------------------|\n\
+|                                     queue_used_hi: 0x%08x                                       |+034h\n\
+|-----------------------------------------------------------------------------------------------------|\n", cfg->queue_select, cfg->queue_msix_vector, cfg->queue_size, cfg->queue_notify_off, cfg->queue_enable, cfg->queue_desc_lo, cfg->queue_desc_hi, cfg->queue_avail_lo, cfg->queue_avail_hi, cfg->queue_used_lo, cfg->queue_used_hi);
+		printf("-----  Dump queue %u Info end  -----\n\n",
+		       cfg->queue_select);
 	}
+	printf
+	    ("----------  Dump VIRTIO_PCI_CAP_COMMON_CFG Info end  <<<<<<<<<<\n\n");
 }
 
 #if 1
 static void show_notify_region(struct pci_device *pdev)
 {
-	printf("Dump VIRTIO_PCI_CAP_NOTIFY_CFG info:\n");
+	printf
+	    ("\n>>>>>>>>>>  Dump VIRTIO_PCI_CAP_NOTIFY_CFG Info begin  ----------\n");
 
 	// get total queue.
 	struct virtio_pci_common_cfg *cfg;
@@ -210,29 +336,38 @@ static void show_notify_region(struct pci_device *pdev)
 	printf("num_queues:\t0x%04x\n", cfg->num_queues);
 	for (int qid = 0; qid < cfg->num_queues; qid++) {
 		cfg->queue_select = qid;
-		printf("queue %u ~~~~~~~~~~~~~~~~\n", qid);
+		u32 offset =
+		    cfg->queue_notify_off * pdev->vdpa.notify_off_multiplier;
 
-		printf("queue_notify_off:\t0x%04x\n",
-		       cfg->queue_notify_off);
-		printf("pdev->vdpa.notify_off_multiplier = %u\n", pdev->vdpa.notify_off_multiplier);
-		u32 offset = cfg->queue_notify_off * pdev->vdpa.notify_off_multiplier;
-		printf("offset = %u\n", offset);
-		printf("notify addr = %p, notify[%d]=0x%x\n", notify_base+offset, qid, ((u32 *)notify_base)[qid]);
+		printf
+		    ("queue: %u\tqueue_notify_off: 0x%04x\tpdev->vdpa.notify_off_multiplier = %u\toffset = %u\n",
+		     qid, cfg->queue_notify_off,
+		     pdev->vdpa.notify_off_multiplier, offset);
+		//assign qid to notify regs test
+		memcpy(notify_base + offset, &qid, sizeof(qid));
+
+		printf("\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|                                                 |    notify[%u].addr=%p:(WO)value=0x%02x   |\n\
+|-----------------------------------------------------------------------------------------------------|\n", cfg->queue_select, notify_base + offset, (u16)(*((u8 *)notify_base + offset)));
+
 		//>>>test
 #if 0
-//		cfg->device_status = 0;
+//              cfg->device_status = 0;
 		printf("device_status:\t0x%02x\n", cfg->device_status);
 		printf("queue_enable:\t0x%04x\n", cfg->queue_enable);
 		cfg->queue_enable = 0;
 		printf("queue_enable:\t0x%04x\n", cfg->queue_enable);
-		printf("notify addr = %p, notify[%d]=0x%x\n", notify_base+offset, qid, ((u32 *)notify_base)[qid]);
-		((u32 *)notify_base)[qid] = 1 << qid;
-		printf("notify addr = %p, new notify[%d]=0x%x\n", notify_base+offset, qid, ((u32 *)notify_base)[qid]);
+		printf("notify addr = %p, notify[%d]=0x%x\n",
+		       notify_base + offset, qid, ((u32 *) notify_base)[qid]);
+		((u32 *) notify_base)[qid] = 1 << qid;
+		printf("notify addr = %p, new notify[%d]=0x%x\n",
+		       notify_base + offset, qid, ((u32 *) notify_base)[qid]);
 #endif
 		//<<<test
 	}
-
-
+	printf
+	    ("----------  Dump VIRTIO_PCI_CAP_NOTIFY_CFG Info end  <<<<<<<<<<\n\n");
 }
 #endif
 
@@ -258,19 +393,26 @@ read_dev_config(struct pci_device *pdev, size_t offset, void *dst, int length)
 
 static void show_device_region(struct pci_device *pdev)
 {
-	printf("Dump VIRTIO_PCI_CAP_DEVICE_CFG info:\n");
+	printf
+	    ("\n>>>>>>>>>>  Dump VIRTIO_PCI_CAP_DEVICE_CFG Info begin  ----------\n");
 
 	struct virtio_net_config *net = pdev->vdpa.device_base;
 
-	printf("MAC:\t0x %02x:%02x:%02x:%02x:%02x:%02x\n", net->mac[0],
+	printf("\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|        mac[3]: 0x%02x    |      mac[2]: 0x%02x      |        mac[1]: 0x%02x     |        mac[0]: 0x%02x     |+000h\n\
+|-------------------------------------------------|-------------------------|-------------------------|\n\
+|        status:(RO for driver):0x%04x            |        mac[5]: 0x%02x     |        mac[4]: 0x%02x     |+004h\n\
+|-------------------------------------------------|---------------------------------------------------|\n\
+|           mtu:(RO for driver):%4u              |  max_virtqueue_pairs:(RO for driver):0x%04x       |+008h\n\
+|-----------------------------------------------------------------------------------------------------|\n", net->mac[3], net->mac[2], net->mac[1], net->mac[0], net->status, net->mac[5], net->mac[4], net->mtu, net->max_virtqueue_pairs);
+	printf("MAC:\t %02x:%02x:%02x:%02x:%02x:%02x\n", net->mac[0],
 	       net->mac[1], net->mac[2], net->mac[3], net->mac[4], net->mac[5]);
+	printf("MTU:\t %u\n", net->mtu);
 
-	printf("status = %u\n", net->status);
-
-	printf("max_virtqueue_pairs = %u\n", net->max_virtqueue_pairs);
-	printf("mtu = %u\n", net->mtu);
+	printf
+	    ("----------  Dump VIRTIO_PCI_CAP_DEVICE_CFG Info end  <<<<<<<<<<\n\n");
 }
-
 
 static void get_cap_info(struct pci_device *pdev)
 {
@@ -281,7 +423,7 @@ static void get_cap_info(struct pci_device *pdev)
 	ret = pci_vfio_read_config(pdev, &pos, 1, PCI_CAPABILITY_LIST);
 	if (ret < 0) {
 		printf("failed to read pci capability list\n");
-                return;
+		return;
 	}
 
 	while (pos) {
@@ -295,62 +437,68 @@ static void get_cap_info(struct pci_device *pdev)
 			goto next;
 
 		printf("cfg type: %u, bar: %u, offset: 0x%08x, "
-                                "len: 0x%08x\n", cap.cfg_type, cap.bar,
-                                cap.offset, cap.length);
+		       "len: 0x%08x\n", cap.cfg_type, cap.bar,
+		       cap.offset, cap.length);
 		switch (cap.cfg_type) {
 //Get the PCIe's virtio bar space
 		case VIRTIO_PCI_CAP_COMMON_CFG:	//
-			pdev->vdpa.common_base = pdev->mem_resource[cap.bar] + cap.offset;
-			pdev->vdpa.common =  pdev->reg[cap.bar].offset + cap.offset;
-			printf("common bar offset = 0x%lx\n", pdev->vdpa.common);
-			show_common_region(pdev);
+			pdev->vdpa.common_base =
+			    pdev->mem_resource[cap.bar] + cap.offset;
+			pdev->vdpa.common =
+			    pdev->reg[cap.bar].offset + cap.offset;
 			break;
 		case VIRTIO_PCI_CAP_NOTIFY_CFG:	//
 #if 1
-			pdev->vdpa.notify_base = pdev->mem_resource[cap.bar] + cap.offset;
-			printf
-			    ("Dump VIRTIO_PCI_CAP_NOTIFY_CFG info:>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-//			get_virtio_cap_cfg_info(pdev,
-//						&pdev->vdpa.notify,
-//						pos);
-			char *notify_cap = malloc(cap.cap_len);			
-			ret = pci_vfio_read_config(pdev, notify_cap, cap.cap_len, pos);
+			pdev->vdpa.notify_base =
+			    pdev->mem_resource[cap.bar] + cap.offset;
+//                      get_virtio_cap_cfg_info(pdev,
+//                                              &pdev->vdpa.notify,
+//                                              pos);
+			char *notify_cap = malloc(cap.cap_len);
+			ret =
+			    pci_vfio_read_config(pdev, notify_cap, cap.cap_len,
+						 pos);
 			if (ret < 0) {
 				printf("failed to read cap at pos: %x\n", pos);
 				break;
 			}
-			pdev->vdpa.notify_off_multiplier = *(u32 *)(notify_cap+0x10);
-			printf("notify_off_multiplier = %u\n", pdev->vdpa.notify_off_multiplier);
+			pdev->vdpa.notify_off_multiplier =
+			    *(u32 *) (notify_cap + 0x10);
 
 #endif
-			show_notify_region(pdev);
 			break;
 		case VIRTIO_PCI_CAP_ISR_CFG:	//
 #if 0
-			pdev->vdpa.isr_base = pdev->mem_resource[cap.bar] + cap.offset;
+			pdev->vdpa.isr_base =
+			    pdev->mem_resource[cap.bar] + cap.offset;
 			printf("Dump VIRTIO_PCI_CAP_ISR_CFG info:\n");
 			get_virtio_cap_cfg_info(pdev,
-						&pdev->virtio_isr_cap,
-						pos);
+						&pdev->virtio_isr_cap, pos);
 #endif
 			break;
 		case VIRTIO_PCI_CAP_DEVICE_CFG:	//
-			pdev->vdpa.device_base = pdev->mem_resource[cap.bar] + cap.offset;
-			pdev->vdpa.device = pdev->reg[cap.bar].offset + cap.offset;
-			printf("device bar offset = 0x%lx\n", pdev->vdpa.device);
-			show_device_region(pdev);
+			pdev->vdpa.device_base =
+			    pdev->mem_resource[cap.bar] + cap.offset;
+			pdev->vdpa.device =
+			    pdev->reg[cap.bar].offset + cap.offset;
 			break;
 		case VIRTIO_PCI_CAP_PCI_CFG:	//
-#if 0			
+#if 0
 			get_virtio_cap_cfg_info(pdev,
-						&pdev->virtio_pci_cap,
-						pos);
+						&pdev->virtio_pci_cap, pos);
 #endif
 			break;
 		}
-next:		
+next:
 		pos = cap.cap_next;
 	}
+	printf("common bar offset = 0x%lx\n",
+	       pdev->vdpa.common);
+	show_common_region(pdev);
+	show_notify_region(pdev);
+	printf("device bar offset = 0x%lx\n",
+	       pdev->vdpa.device);
+	show_device_region(pdev);
 
 }
 
@@ -437,7 +585,7 @@ int main(int argc, char *argv[])
 
 	/* Get the device's pdev.vfio.group index */
 	///sys/bus/pci/devices/0000\:60\:00.0/iommu_group
-//	char *sys_path = "/sys/bus/pci/devices/" DEVICE_ID "/iommu_group";
+//      char *sys_path = "/sys/bus/pci/devices/" DEVICE_ID "/iommu_group";
 	char sys_path[256];
 	sprintf(sys_path, "/sys/bus/pci/devices/%s/iommu_group", argv[1]);
 	printf("sys_path = %s\n", sys_path);
@@ -503,32 +651,33 @@ int main(int argc, char *argv[])
 
 	ret = ioctl(pdev.vfio.container, VFIO_IOMMU_MAP_DMA, &dma_map);
 	if (ret < 0) {
-		printf("Error: VFIO_IOMMU_MAP_DMA.\n");
-		return -1;
+		printf("Error: VFIO_IOMMU_MAP_DMA. ret=%d\n", ret);
+		return ret;
 	}
 
-	/* Get a file descriptor for the device */
-	pdev.vfio.device =
-	    ioctl(pdev.vfio.group, VFIO_GROUP_GET_DEVICE_FD, bdf);
-//      device = ioctl(pdev.vfio.group, VFIO_GROUP_GET_DEVICE_FD, "0000:60:05.0 vf_token=cdc786f0-59d4-41d9-b554-fed36ff5e89f");
-	if (pdev.vfio.device < 0) {
-		printf("Error: VFIO_GROUP_GET_DEVICE_FD.(%d)\n",
-		       pdev.vfio.device);
-		return -1;
-	}
+          /* Get a file descriptor for the device */
+          pdev.vfio.device =
+              ioctl(pdev.vfio.group, VFIO_GROUP_GET_DEVICE_FD, bdf);
+  //      device = ioctl(pdev.vfio.group, VFIO_GROUP_GET_DEVICE_FD, "0000:60:05.0 vf_token=cdc786f0-59
+          if (pdev.vfio.device < 0) {
+                  printf("Error: VFIO_GROUP_GET_DEVICE_FD.(%d)\n",
+                         pdev.vfio.device);
+                  return -1;
+          }
 
-	/* Test and setup the device */
-	/* API VFIO_DEVICE_GET_INFO */
+          /* Test and setup the device */
+          /* API VFIO_DEVICE_GET_INFO */
+
 	ret = ioctl(pdev.vfio.device, VFIO_DEVICE_GET_INFO, &device_info);
 	if (ret < 0) {
-		printf("Error: VFIO_DEVICE_GET_INFO.\n");
-		return -1;
+		printf("Error: VFIO_DEVICE_GET_INFO. ret=%d\n", ret);
+		return ret;
 	}
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0)
 	printf
 	    ("device_info.flags=0x%x\t, device_info.num_regions=0x%x\t, device_info.num_irqs=0x%x\t, device_info.cap_offset=0x%x\n",
-	     device_info.flags, device_info.num_regions, device_info.num_irqs,
-	     device_info.cap_offset);
+	     device_info.flags, device_info.num_regions,
+	     device_info.num_irqs, device_info.cap_offset);
 #else
 	printf
 	    ("device_info.flags=0x%x\t, device_info.num_regions=0x%x\t, device_info.num_irqs=0x%x\n",
@@ -589,8 +738,8 @@ int main(int argc, char *argv[])
 		pdev.reg[bar_idx].offset = reg.offset;
 /* Get a mmap of bar0~bar5 space */
 		pdev.mem_resource[bar_idx] =
-		    mmap(NULL, reg.size, PROT_READ | PROT_WRITE, MAP_SHARED,
-			 pdev.vfio.device, reg.offset);
+		    mmap(NULL, reg.size, PROT_READ | PROT_WRITE,
+			 MAP_SHARED, pdev.vfio.device, reg.offset);
 		if (!pdev.mem_resource[bar_idx]) {
 			printf("bar[%d] mmap failed!\n", bar_idx);
 			return -1;
@@ -600,6 +749,7 @@ int main(int argc, char *argv[])
 //Get the capabilities info of virtio.
 	get_cap_info(&pdev);
 
+	printf("\n>>>>>>>>>>  Dump IRQ Info begin  ----------\n");
 	for (i = 0; i < device_info.num_irqs; i++) {
 		struct vfio_irq_info irq = {.argsz = sizeof(irq) };
 
@@ -615,6 +765,7 @@ int main(int argc, char *argv[])
 		printf("irq.flags=0x%x,irq.index=%u\t, irq.count=%u\n",
 		       irq.flags, irq.index, irq.count);
 	}
+	printf("----------  Dump IRQ Info end  <<<<<<<<<<\n\n");
 
 	/* Gratuitous device reset and go... */
 	ioctl(pdev.vfio.device, VFIO_DEVICE_RESET);
