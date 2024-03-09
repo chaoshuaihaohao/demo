@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../liboauth-1.0.3-openssl-1.1.0-3.patch
+./configure --prefix=/usr --disable-static &&
+make
+make dox
+make install
+install -v -dm755 /usr/share/doc/liboauth-1.0.3 &&
+cp -rv doc/html/* /usr/share/doc/liboauth-1.0.3
+
+#End scripts

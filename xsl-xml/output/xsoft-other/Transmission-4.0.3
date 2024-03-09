@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DCMAKE_INSTALL_DOCDIR=/usr/share/doc/transmission-4.0.3 \
+      .. &&
+
+make
+make install
+rsvg-convert                                               \
+   /usr/share/icons/hicolor/scalable/apps/transmission.svg \
+   -o /usr/share/pixmaps/transmission.png
+
+#End scripts

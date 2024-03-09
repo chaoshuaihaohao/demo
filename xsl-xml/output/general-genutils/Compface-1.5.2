@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --mandir=/usr/share/man &&
+make
+make install &&
+install -m755 -v xbm2xface.pl /usr/bin
+
+#End scripts

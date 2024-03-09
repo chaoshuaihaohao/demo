@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr &&
+make
+doxygen
+make install
+install -vdm 755 /usr/share/doc/qrencode-4.1.1 &&
+mv html/* /usr/share/doc/qrencode-4.1.1
+
+#End scripts

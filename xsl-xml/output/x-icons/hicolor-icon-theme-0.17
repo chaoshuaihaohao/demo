@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr
+make install
+
+#End scripts

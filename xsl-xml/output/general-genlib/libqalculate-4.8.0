@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/libqalculate-4.8.0 &&
+make
+make install
+
+#End scripts

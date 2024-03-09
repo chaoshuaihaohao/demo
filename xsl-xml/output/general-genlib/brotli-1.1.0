@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      ..  &&
+make
+make install
+cd .. &&
+pip3 wheel -w dist --no-build-isolation --no-deps $PWD
+pip3 install --no-index --find-links dist --no-cache-dir --no-user Brotli
+
+#End scripts

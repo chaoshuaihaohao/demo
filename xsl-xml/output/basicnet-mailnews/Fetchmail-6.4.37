@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+useradd -c "Fetchmail User" -d /dev/null -g nogroup \
+        -s /bin/false -u 38 fetchmail
+PYTHON=python3 \
+./configure --prefix=/usr \
+            --enable-fallback=procmail &&
+make
+make install                                  &&
+chown -v fetchmail:nogroup /usr/bin/fetchmail
+
+#End scripts

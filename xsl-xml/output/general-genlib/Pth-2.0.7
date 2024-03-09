@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's#$(LOBJS): Makefile#$(LOBJS): pth_p.h Makefile#' Makefile.in &&
+./configure --prefix=/usr           \
+            --disable-static        \
+            --mandir=/usr/share/man &&
+make
+make install &&
+install -v -m755 -d /usr/share/doc/pth-2.0.7 &&
+install -v -m644    README PORTING SUPPORT TESTS \
+                    /usr/share/doc/pth-2.0.7
+
+#End scripts

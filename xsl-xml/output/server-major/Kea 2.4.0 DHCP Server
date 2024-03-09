@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --docdir=/usr/share/doc/kea-2.4.0 \
+            --localstatedir=/var \
+            --enable-shell       \
+            --with-openssl       \
+            --disable-static &&
+make
+make -j1 install
+make install-kea-dhcpd
+
+#End scripts

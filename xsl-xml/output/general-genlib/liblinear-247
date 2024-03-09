@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+make lib
+install -vm644 linear.h /usr/include &&
+install -vm755 liblinear.so.5 /usr/lib &&
+ln -sfv liblinear.so.5 /usr/lib/liblinear.so
+
+#End scripts

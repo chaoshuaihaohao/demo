@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --disable-static        \
+            --with-drill            &&
+make
+make doc
+make install
+install -v -m755 -d /usr/share/doc/ldns-1.8.3 &&
+install -v -m644 doc/html/* /usr/share/doc/ldns-1.8.3
+
+#End scripts

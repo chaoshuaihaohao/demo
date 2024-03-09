@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr    \
+      -DSYSCONF_INSTALL_DIR=/etc     \
+      -DENABLE_VALA_BINDINGS=ON      \
+      -DENABLE_INSTALLED_TESTS=ON    \
+      -DWITH_OPENLDAP=OFF            \
+      -DWITH_KRB5=OFF                \
+      -DENABLE_INTROSPECTION=ON      \
+      -DENABLE_GTK_DOC=OFF           \
+      -DWITH_LIBDB=OFF               \
+      -Wno-dev -G Ninja ..           &&
+ninja
+ninja install
+
+#End scripts

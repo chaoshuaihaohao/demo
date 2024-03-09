@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dlibportal=false   \
+            ..                  &&
+ninja
+ninja install
+update-desktop-database
+
+#End scripts

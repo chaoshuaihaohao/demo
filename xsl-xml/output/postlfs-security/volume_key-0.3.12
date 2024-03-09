@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -e '/AM_PATH_GPGME/iAM_PATH_GPG_ERROR' \
+    -e 's/gpg2/gpg/' -i configure.ac
+autoreconf -fiv              &&
+./configure --prefix=/usr    \
+            --without-python &&
+make
+make install
+
+#End scripts

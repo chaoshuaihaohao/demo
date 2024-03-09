@@ -1,0 +1,37 @@
+#!/bin/bash
+
+#Start scripts
+sed -e 's/-qt4/-qt5/'              \
+    -e 's/moc_location/host_bins/' \
+    -i examples/C/qt/meson.build   &&
+
+sed -e 's/Qt/&5/'                  \
+    -i meson.build
+grep -rl '^#!.*python$' | xargs sed -i '1s/python/&3/'
+mkdir build &&
+cd    build    &&
+
+CXXFLAGS+="-O2 -fPIC"            \
+meson setup ..                   \
+      --prefix=/usr              \
+      --buildtype=release        \
+      -Dlibaudit=no              \
+      -Dlibpsl=false             \
+      -Dnmtui=true               \
+      -Dovs=false                \
+      -Dppp=false                \
+      -Dselinux=false            \
+      -Dqt=false                 \
+      -Dsession_tracking=systemd \
+      -Dmodem_manager=false      &&
+ninja
+ninja install &&
+mv -v /usr/share/doc/NetworkManager{,-1.44.0}
+for file in $(echo ../man/*.[1578]); do
+    section=${file##*.} &&
+    install -vdm 755 /usr/share/man/man$section
+    install -vm 644 $file /usr/share/man/man$section/
+done
+cp -Rv ../docs/{api,libnm} /usr/share/doc/NetworkManager-1.44.0
+
+#End scripts

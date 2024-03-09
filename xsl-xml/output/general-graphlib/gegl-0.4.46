@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+rm -f /usr/lib/gegl-0.4/vector-fill.so
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

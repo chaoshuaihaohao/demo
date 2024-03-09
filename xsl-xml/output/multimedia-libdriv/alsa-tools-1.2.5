@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#Start scripts
+bash -e
+rm -rf qlo10k1 Makefile gitcompile
+for tool in *
+do
+  case $tool in
+    seq )
+      tool_dir=seq/sbiload
+    ;;
+    * )
+      tool_dir=$tool
+    ;;
+  esac
+
+  pushd $tool_dir
+    ./configure --prefix=/usr
+    make
+    as_root make install
+    as_root /sbin/ldconfig
+  popd
+
+done
+unset tool tool_dir
+exit
+
+#End scripts

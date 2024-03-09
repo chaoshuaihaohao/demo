@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+export TEXARCH=$(uname -m | sed -e 's/i.86/i386/' -e 's/$/-linux/') &&
+
+sed -i "s/ grep -v '^;'/ awk NF/" make-rules/inputenc/Makefile.in &&
+
+sed -i 's%\(indexentry\)%\1\\%' make-rules/inputenc/make-inp-rules.pl &&
+
+patch -Np1 -i ../xindy-2.5.1-upstream_fixes-2.patch &&
+
+./configure --prefix=$TEXLIVE_PREFIX              \
+            --bindir=$TEXLIVE_PREFIX/bin/$TEXARCH \
+            --datarootdir=$TEXLIVE_PREFIX         \
+            --includedir=/usr/include             \
+            --libdir=$TEXLIVE_PREFIX/texmf-dist   \
+            --mandir=$TEXLIVE_PREFIX/texmf-dist/doc/man &&
+
+make LC_ALL=POSIX
+make install
+
+#End scripts

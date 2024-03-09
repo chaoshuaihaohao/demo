@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 83 ldap &&
+useradd  -c "OpenLDAP Daemon Owner" \
+         -d /var/lib/openldap -u 83 \
+         -g ldap -s /bin/false ldap
+patch -Np1 -i ../openldap-2.6.6-consolidated-1.patch &&
+autoconf &&
+
+./configure --prefix=/usr         \
+            --sysconfdir=/etc     \
+            --localstatedir=/var  \
+            --libexecdir=/usr/lib \
+            --disable-static      \
+            --enable-versioning=yes \
+            --disable-debug       \
+            --with-tls=openssl    \
+            --with-cyrus-sasl     \
+            --without-systemd     \
+            --enable-dynamic      \
+            --enable-crypt        \
+            --enable-spasswd      \
+            --enable-slapd        \
+            --enable-modules      \
+            --enable-rlookups     \
+            --enable-backends=mod \
+            --disable-sql         \
+            --disable-wt          \
+            --enable-overlays=mod &&
+
+make depend &&
+make
+make install &&
+
+sed -e "s/\.la/.so/" -i /etc/openldap/slapd.{conf,ldif}{,.default} &&
+
+install -v -dm700 -o ldap -g ldap /var/lib/openldap     &&
+
+install -v -dm700 -o ldap -g ldap /etc/openldap/slapd.d &&
+chmod   -v    640     /etc/openldap/slapd.{conf,ldif}   &&
+chown   -v  root:ldap /etc/openldap/slapd.{conf,ldif}   &&
+
+install -v -dm755 /usr/share/doc/openldap-2.6.6 &&
+cp      -vfr      doc/{drafts,rfc,guide} \
+                  /usr/share/doc/openldap-2.6.6
+
+#End scripts

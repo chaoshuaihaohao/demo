@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+sed -e '/TryExec/s|=|=/usr/bin/|' \
+    -i xsession/lxqt.desktop.in &&
+
+mkdir -v build &&
+cd       build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      ..       &&
+make
+make install
+
+#End scripts

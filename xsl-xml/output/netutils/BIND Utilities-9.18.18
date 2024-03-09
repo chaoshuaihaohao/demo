@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr &&
+make -C lib/isc    &&
+make -C lib/dns    &&
+make -C lib/ns     &&
+make -C lib/isccfg &&
+make -C lib/bind9  &&
+make -C lib/irs    &&
+make -C bin/dig    &&
+make -C doc
+make -C lib/isc    install &&
+make -C lib/dns    install &&
+make -C lib/ns     install &&
+make -C lib/isccfg install &&
+make -C lib/bind9  install &&
+make -C lib/irs    install &&
+make -C bin/dig    install &&
+cp -v doc/man/{dig.1,host.1,nslookup.1} /usr/share/man/man1
+
+#End scripts

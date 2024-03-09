@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/libsamplerate-0.2.2 &&
+make
+make install
+
+#End scripts

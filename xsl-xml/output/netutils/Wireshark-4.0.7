@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 62 wireshark
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DCMAKE_INSTALL_DOCDIR=/usr/share/doc/wireshark-4.0.7 \
+      -G Ninja \
+      .. &&
+ninja
+ninja install &&
+
+install -v -m755 -d /usr/share/doc/wireshark-4.0.7 &&
+install -v -m644    ../README.linux ../doc/README.* ../doc/randpkt.txt \
+                    /usr/share/doc/wireshark-4.0.7 &&
+
+pushd /usr/share/doc/wireshark-4.0.7 &&
+   for FILENAME in ../../wireshark/*.html; do
+      ln -s -v -f $FILENAME .
+   done &&
+popd
+unset FILENAME
+install -v -m644 <Downloaded_Files> \
+                 /usr/share/doc/wireshark-4.0.7
+chown -v root:wireshark /usr/bin/{tshark,dumpcap} &&
+chmod -v 6550 /usr/bin/{tshark,dumpcap}
+usermod -a -G wireshark <username>
+
+#End scripts

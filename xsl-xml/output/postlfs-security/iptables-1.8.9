@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr      \
+            --disable-nftables \
+            --enable-libipq    &&
+make
+make install
+
+#End scripts

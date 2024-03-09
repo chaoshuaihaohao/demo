@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+sed -i -e '/cat./d' documentation/Makefile       &&
+
+./configure --prefix=/usr    \
+            --enable-shared  &&
+make
+make -C documentation html
+make docdir=/usr/share/doc/fltk-1.3.8 install
+make -C test          docdir=/usr/share/doc/fltk-1.3.8 install-linux &&
+make -C documentation docdir=/usr/share/doc/fltk-1.3.8 install-linux
+
+#End scripts

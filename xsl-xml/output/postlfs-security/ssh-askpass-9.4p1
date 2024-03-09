@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+cd contrib &&
+make gnome-ssh-askpass3
+install -v -d -m755                    /usr/libexec/openssh/contrib  &&
+install -v -m755    gnome-ssh-askpass3 /usr/libexec/openssh/contrib  &&
+ln -sv -f contrib/gnome-ssh-askpass3   /usr/libexec/openssh/ssh-askpass
+
+#End scripts

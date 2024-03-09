@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+ln -sv libGL.so.1 /usr/lib/libGLX.so.0
+TEXLIVE_INSTALL_PREFIX=/opt/texlive ./install-tl
+for F in /opt/texlive/2023/texmf-dist/scripts/latex-make/*.py ; do
+  test -f $F && sed -i 's%/usr/bin/env python%/usr/bin/python3%' $F || true
+done
+
+
+#End scripts

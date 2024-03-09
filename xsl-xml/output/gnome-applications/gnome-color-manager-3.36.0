@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed /subdir\(\'man/d -i meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

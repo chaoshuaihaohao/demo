@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/GZIP/s/^/#/' makefile
+make
+make doc_dir=/usr/share/doc/highlight-4.7/ gui
+make doc_dir=/usr/share/doc/highlight-4.7/ install
+make install-gui
+
+#End scripts

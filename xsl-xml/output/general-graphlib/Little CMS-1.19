@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../lcms-1.19-cve_2013_4276-1.patch &&
+
+./configure --prefix=/usr --disable-static       &&
+make
+make install &&
+install -v -m755 -d /usr/share/doc/lcms-1.19 &&
+install -v -m644    README.1ST doc/* \
+                    /usr/share/doc/lcms-1.19
+
+#End scripts

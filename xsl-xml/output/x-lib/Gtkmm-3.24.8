@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+mkdir gtkmm3-build &&
+cd    gtkmm3-build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+mv -v /usr/share/doc/gtkmm-3.0 /usr/share/doc/gtkmm-3.24.8
+
+#End scripts

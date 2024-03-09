@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../asymptote-2.86-build_fix-1.patch
+export TEXARCH=$(uname -m | sed -e 's/i.86/i386/' -e 's/$/-linux/') &&
+
+./configure --prefix=$TEXLIVE_PREFIX                          \
+            --bindir=$TEXLIVE_PREFIX/bin/$TEXARCH             \
+            --datarootdir=$TEXLIVE_PREFIX/texmf-dist          \
+            --infodir=$TEXLIVE_PREFIX/texmf-dist/doc/info     \
+            --libdir=$TEXLIVE_PREFIX/texmf-dist               \
+            --mandir=$TEXLIVE_PREFIX/texmf-dist/doc/man       \
+            --disable-lsp                                     \
+            --enable-gc=system                                \
+            --with-latex=$TEXLIVE_PREFIX/texmf-dist/tex/latex \
+            --with-context=$TEXLIVE_PREFIX/texmf-dist/tex/context/third &&
+
+make
+make install
+
+#End scripts

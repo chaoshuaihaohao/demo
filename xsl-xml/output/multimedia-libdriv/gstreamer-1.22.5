@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson  setup ..            \
+       --prefix=/usr       \
+       --buildtype=release \
+       -Dgst_debug=false   \
+       -Dpackage-origin=https://www.linuxfromscratch.org/blfs/view/systemd/ \
+       -Dpackage-name="GStreamer 1.22.5 BLFS" &&
+ninja
+ninja install
+
+#End scripts

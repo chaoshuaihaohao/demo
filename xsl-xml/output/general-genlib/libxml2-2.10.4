@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --disable-static        \
+            --with-history          \
+            PYTHON=/usr/bin/python3 \
+            --docdir=/usr/share/doc/libxml2-2.10.4 &&
+make
+tar xf ../xmlts20130923.tar.gz
+make install
+
+#End scripts

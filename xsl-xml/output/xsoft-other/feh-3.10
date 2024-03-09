@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+sed -i "s:doc/feh:&-3.10:" config.mk &&
+make PREFIX=/usr
+make PREFIX=/usr install
+
+#End scripts

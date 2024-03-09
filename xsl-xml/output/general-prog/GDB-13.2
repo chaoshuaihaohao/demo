@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+../configure --prefix=/usr          \
+             --with-system-readline \
+             --with-python=/usr/bin/python3 &&
+make
+make -C gdb/doc doxy
+pushd gdb/testsuite &&
+make  site.exp      &&
+echo  "set gdb_test_timeout 120" >> site.exp &&
+runtest
+popd
+make -C gdb install &&
+make -C gdbserver install
+install -d /usr/share/doc/gdb-13.2 &&
+rm -rf gdb/doc/doxy/xml &&
+cp -Rv gdb/doc/doxy /usr/share/doc/gdb-13.2
+
+#End scripts

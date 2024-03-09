@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr     \
+            --enable-gpl      \
+            --without-doxygen \
+            --without-ffmpeg  \
+            --docdir=/usr/share/doc/libquicktime-1.2.4
+make
+make install &&
+
+install -v -m755 -d /usr/share/doc/libquicktime-1.2.4 &&
+install -v -m644    README doc/{*.txt,*.html,mainpage.incl} \
+                    /usr/share/doc/libquicktime-1.2.4
+
+#End scripts

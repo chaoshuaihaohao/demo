@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 64 sddm &&
+useradd  -c "sddm Daemon" \
+         -d /var/lib/sddm \
+         -u 64 -g sddm    \
+         -s /bin/false sddm
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DRUNTIME_DIR=/run/sddm     \
+      -DBUILD_MAN_PAGES=ON        \
+      -DDATA_INSTALL_DIR=/usr/share/sddm \
+      -DDBUS_CONFIG_FILENAME=sddm_org.freedesktop.DisplayManager.conf \
+      .. &&
+make
+make install &&
+install -v -dm755 -o sddm -g sddm /var/lib/sddm
+/usr/bin/sddm --example-config > /etc/sddm.conf
+
+#End scripts

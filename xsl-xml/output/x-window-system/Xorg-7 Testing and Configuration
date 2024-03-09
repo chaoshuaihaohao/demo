@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+cat > /etc/udev/rules.d/99-vga-arbiter.rules << EOF
+# /etc/udev/rules.d/99-vga-arbiter.rules: Set vga_arbiter group/mode
+
+ACTION=="add", KERNEL=="vga_arbiter", GROUP="video" MODE="0660"
+EOF
+
+usermod -a -G video <user running xorg>
+xrandr --listproviders
+xrandr --setprovideroffloadsink <provider> <sink>
+
+#End scripts

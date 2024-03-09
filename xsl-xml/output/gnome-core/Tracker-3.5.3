@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+mv docs/reference/libtracker-sparql/doc/{Tracker-3.0,tracker-3.5.3} &&
+sed '/docs_name/s/Tracker-3.0/tracker-3.5.3/' \
+    -i docs/reference/libtracker-sparql/meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dman=false         \
+            ..                  &&
+ninja
+ninja install
+
+#End scripts

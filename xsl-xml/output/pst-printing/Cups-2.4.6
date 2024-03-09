@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+useradd -c "Print Service User" -d /var/spool/cups -g lp -s /bin/false -u 9 lp
+groupadd -g 19 lpadmin
+usermod -a -G lpadmin <username>
+sed -i 's#@CUPS_HTMLVIEW@#firefox#' desktop/cups.desktop.in
+./configure --libdir=/usr/lib            \
+            --with-rundir=/run/cups      \
+            --with-system-groups=lpadmin \
+            --with-docdir=/usr/share/cups/doc-2.4.6 &&
+make
+make install &&
+ln -svnf ../cups/doc-2.4.6 /usr/share/doc/cups-2.4.6
+echo "ServerName /run/cups/cups.sock" > /etc/cups/client.conf
+
+#End scripts

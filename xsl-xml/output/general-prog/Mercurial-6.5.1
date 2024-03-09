@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Start scripts
+make build
+make doc
+sed -i '138,142d' Makefile
+TESTFLAGS="-j<N> --tmpdir tmp" make check
+pushd tests  &&
+  rm -rf tmp &&
+  ./run-tests.py --tmpdir tmp test-gpg.t
+popd
+make PREFIX=/usr install-bin
+make PREFIX=/usr install-doc
+cat >> ~/.hgrc << "EOF"
+[ui]
+username = <user_name> <user@mail>
+EOF
+
+#End scripts

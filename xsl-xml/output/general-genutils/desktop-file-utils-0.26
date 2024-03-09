@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+rm -fv /usr/bin/desktop-file-edit
+patch -Np1 -i ../desktop-file-utils-0.26-update_standard-1.patch
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

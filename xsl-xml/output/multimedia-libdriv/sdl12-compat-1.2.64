@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=RELEASE  \
+      ..  &&
+make
+make install &&
+rm -vf /usr/lib/libSDLmain.a
+
+#End scripts

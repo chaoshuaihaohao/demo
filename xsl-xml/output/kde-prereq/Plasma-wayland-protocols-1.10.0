@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+make install
+
+#End scripts

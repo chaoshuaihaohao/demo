@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr           \
+            --disable-static        \
+            --disable-documentation &&
+make
+make fssum
+pushd tests
+   ./fsck-tests.sh
+   ./mkfs-tests.sh
+   ./cli-tests.sh
+   sed 's/,orphan_file//' /etc/mke2fs.conf >./custom_mke2fs.conf &&
+   export MKE2FS_CONFIG=$PWD/custom_mke2fs.conf                  &&
+   ./convert-tests.sh
+   unset MKE2FS_CONFIG && rm custom_mke2fs.conf
+   ./misc-tests.sh
+   ./fuzz-tests.sh
+popd
+make install
+for i in 5 8; do
+   install Documentation/*.$i /usr/share/man/man$i
+done
+tune2fs -O ^orphan_file /dev/sdxx
+
+#End scripts

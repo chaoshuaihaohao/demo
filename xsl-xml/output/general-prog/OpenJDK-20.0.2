@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#Start scripts
+tar -xf ../jtreg-7.2+1.tar.gz
+unset JAVA_HOME                             &&
+bash configure --enable-unlimited-crypto    \
+               --disable-warnings-as-errors \
+               --with-stdc++lib=dynamic     \
+               --with-giflib=system         \
+               --with-harfbuzz=system       \
+               --with-jtreg=$PWD/jtreg      \
+               --with-lcms=system           \
+               --with-libjpeg=system        \
+               --with-libpng=system         \
+               --with-zlib=system           \
+               --with-version-build="9"     \
+               --with-version-pre=""        \
+               --with-version-opt=""        \
+               --with-cacerts-file=/etc/pki/tls/java/cacerts &&
+make images
+export JT_JAVA=$(echo $PWD/build/*/jdk) &&
+jtreg/bin/jtreg -jdk:$JT_JAVA -automatic -ignore:quiet -v1 \
+    test/jdk:tier1 test/langtools:tier1 &&
+unset JT_JAVA
+install -vdm755 /opt/jdk-20.0.2+9             &&
+cp -Rv build/*/images/jdk/* /opt/jdk-20.0.2+9 &&
+chown -R root:root /opt/jdk-20.0.2+9          &&
+for s in 16 24 32 48; do
+  install -vDm644 src/java.desktop/unix/classes/sun/awt/X11/java-icon${s}.png \
+                  /usr/share/icons/hicolor/${s}x${s}/apps/java.png
+done
+ln -v -nsf jdk-20.0.2+9 /opt/jdk
+mkdir -pv /usr/share/applications &&
+
+cat > /usr/share/applications/openjdk-java.desktop << "EOF" &&
+[Desktop Entry]
+Name=OpenJDK Java 20.0.2 Runtime
+Comment=OpenJDK Java 20.0.2 Runtime
+Exec=/opt/jdk/bin/java -jar
+Terminal=false
+Type=Application
+Icon=java
+MimeType=application/x-java-archive;application/java-archive;application/x-jar;
+NoDisplay=true
+EOF
+cat > /usr/share/applications/openjdk-jconsole.desktop << "EOF"
+[Desktop Entry]
+Name=OpenJDK Java 20.0.2 Console
+Comment=OpenJDK Java 20.0.2 Console
+Keywords=java;console;monitoring
+Exec=/opt/jdk/bin/jconsole
+Terminal=false
+Type=Application
+Icon=java
+Categories=Application;System;
+EOF
+
+#End scripts

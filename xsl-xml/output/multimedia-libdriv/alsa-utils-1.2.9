@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+echo '' > alsactl/init_sysdeps.c
+./configure --disable-alsaconf \
+            --disable-bat   \
+            --disable-xmlto \
+            --with-curses=ncursesw &&
+make
+make install
+
+#End scripts

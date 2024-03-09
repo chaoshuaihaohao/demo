@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --sysconfdir=/etc &&
+make
+make install
+notify-send -i info Information "Hi ${USER}, This is a Test"
+
+#End scripts

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr                \
+            --enable-compile-warnings=no \
+            --enable-cxx-warnings=no     \
+            --disable-nautilus           &&
+make
+make install
+
+#End scripts

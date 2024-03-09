@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#Start scripts
+sed 's@/bin/sh@/bin/sh -l@' -i gnome-session/gnome-session.in
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+mv -v /usr/share/doc/gnome-session{,-44.0}
+rm -v /usr/share/xsessions/gnome.desktop &&
+rm -v /usr/share/wayland-sessions/gnome.desktop
+cat > ~/.xinitrc << "EOF"
+dbus-run-session gnome-session
+EOF
+
+startx
+XDG_SESSION_TYPE=wayland dbus-run-session gnome-session
+
+#End scripts

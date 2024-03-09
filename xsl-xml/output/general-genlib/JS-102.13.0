@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Start scripts
+mkdir obj &&
+cd    obj &&
+
+sh ../js/src/configure.in --prefix=/usr            \
+                          --with-intl-api          \
+                          --with-system-zlib       \
+                          --with-system-icu        \
+                          --disable-jemalloc       \
+                          --disable-debug-symbols  \
+                          --enable-readline        &&
+make
+make install &&
+rm -v /usr/lib/libjs_static.ajs &&
+sed -i '/@NSPR_CFLAGS@/d' /usr/bin/js102-config
+
+#End scripts

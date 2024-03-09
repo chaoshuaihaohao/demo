@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr &&
+make
+make install &&
+sed -i 's/Utility;//' /usr/share/applications/gpicview.desktop
+
+#End scripts

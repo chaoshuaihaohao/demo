@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+sed -i s/plain/release/ meson.build
+mkdir gedit-build &&
+cd    gedit-build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dgtk_doc=false     \
+            .. &&
+ninja
+ninja install
+
+#End scripts

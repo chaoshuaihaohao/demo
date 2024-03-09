@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./Configure -n linux &&
+make
+make check
+install -v -m4755 -o root -g root lsof /usr/bin &&
+install -v lsof.8 /usr/share/man/man8
+
+#End scripts

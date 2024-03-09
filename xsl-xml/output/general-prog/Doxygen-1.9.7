@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Start scripts
+grep -rl '^#!.*python$' | xargs sed -i '1s/python/&3/'
+mkdir -v build &&
+cd       build &&
+
+cmake -G "Unix Makefiles"         \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -Wno-dev .. &&
+
+make
+cmake -DDOC_INSTALL_DIR=share/doc/doxygen-1.9.7 -Dbuild_doc=ON .. &&
+
+make docs
+make install &&
+install -vm644 ../doc/*.1 /usr/share/man/man1
+
+#End scripts

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr     \
+            --sysconfdir=/etc \
+            --disable-static  &&
+make
+make install
+pgrep -l notification-da &&
+notify-send -i info Information "Hi ${USER}, This is a Test"
+
+#End scripts

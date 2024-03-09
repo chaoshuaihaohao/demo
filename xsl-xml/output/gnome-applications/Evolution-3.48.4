@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DSYSCONF_INSTALL_DIR=/etc  \
+      -DENABLE_INSTALLED_TESTS=ON \
+      -DENABLE_PST_IMPORT=OFF     \
+      -DENABLE_YTNEF=OFF          \
+      -DENABLE_CONTACT_MAPS=OFF   \
+      -DENABLE_MARKDOWN=OFF       \
+      -DENABLE_WEATHER=ON         \
+      -G Ninja .. &&
+ninja
+ninja install
+
+#End scripts

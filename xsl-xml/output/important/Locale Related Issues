@@ -1,0 +1,6 @@
+#!/bin/bash
+
+#Start scripts
+find /usr/share/man -type f | xargs checkman.sh
+
+#End scripts

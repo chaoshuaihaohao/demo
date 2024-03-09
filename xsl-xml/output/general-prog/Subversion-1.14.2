@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Start scripts
+grep -rl '^#!.*python$' | xargs sed -i '1s/python/&3/'
+sed -e 's/File.exists?/File.exist?/'               \
+    -i subversion/bindings/swig/ruby/svn/util.rb   \
+       subversion/bindings/swig/ruby/test/test_wc.rb
+PYTHON=python3 ./configure --prefix=/usr             \
+            --disable-static          \
+            --with-apache-libexecdir  \
+            --with-lz4=internal       \
+            --with-utf8proc=internal &&
+make
+doxygen doc/doxygen.conf
+make install &&
+
+install -v -m755 -d /usr/share/doc/subversion-1.14.2 &&
+cp      -v -R doc/* /usr/share/doc/subversion-1.14.2
+
+#End scripts

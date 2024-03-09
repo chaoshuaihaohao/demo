@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/libdvdcss-1.4.3 &&
+make
+make install
+
+#End scripts

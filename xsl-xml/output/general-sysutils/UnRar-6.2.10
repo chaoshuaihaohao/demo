@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Start scripts
+make -f makefile
+install -v -m755 unrar /usr/bin
+
+#End scripts

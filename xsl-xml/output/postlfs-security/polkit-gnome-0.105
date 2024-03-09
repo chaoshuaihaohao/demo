@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../polkit-gnome-0.105-consolidated_fixes-1.patch
+./configure --prefix=/usr &&
+make
+make install
+
+#End scripts

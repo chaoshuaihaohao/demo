@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../glib-skip_warnings-1.patch
+mkdir build &&
+cd    build &&
+
+meson setup ..            \
+      --prefix=/usr       \
+      --buildtype=release \
+      -Dman=true          &&
+ninja
+ninja install &&
+
+mkdir -p /usr/share/doc/glib-2.76.4 &&
+cp -r ../docs/reference/{gio,glib,gobject} /usr/share/doc/glib-2.76.4
+
+#End scripts

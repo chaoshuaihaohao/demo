@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr           \
+            --buildtype=release     \
+            -Dbash_completion=false \
+            ..                      &&
+ninja
+ninja install
+cd ..              &&
+tar -xf ../dconf-editor-43.0.tar.xz &&
+cd dconf-editor-43.0                &&
+
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

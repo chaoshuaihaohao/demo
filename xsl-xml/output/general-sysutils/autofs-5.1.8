@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+grep -rl linux/fs modules | xargs sed -i "/linux\/fs/d"
+./configure --prefix=/usr             \
+            --with-mapdir=/etc/autofs \
+            --with-libtirpc           \
+            --with-systemd            \
+            --without-openldap        \
+            --mandir=/usr/share/man &&
+make
+make install
+make install_samples
+
+#End scripts

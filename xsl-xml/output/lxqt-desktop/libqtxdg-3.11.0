@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+mkdir -v build &&
+cd       build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DCMAKE_INSTALL_LIBDIR=lib  \
+      ..       &&
+
+make
+make install
+
+#End scripts

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup ..            \
+      --prefix=/usr       \
+      --buildtype=release \
+      -Ddocs=false        &&
+ninja
+sed "/output: 'libgusb'/s/'\$/-0.4.6'/" -i ../docs/meson.build &&
+meson configure -Ddocs=true                                    &&
+ninja
+ninja install
+
+#End scripts

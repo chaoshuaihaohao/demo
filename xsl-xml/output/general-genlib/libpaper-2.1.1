@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --disable-static     \
+            --enable-relocatable \
+            --docdir=/usr/share/doc/libpaper-2.1.1 &&
+make
+make install
+
+#End scripts

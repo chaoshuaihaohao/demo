@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -i -e 's/png_ptr->jmpbuf/png_jmpbuf(png_ptr)/' src/xsane-save.c &&
+./configure --prefix=/usr                                           &&
+make
+make xsanedocdir=/usr/share/doc/xsane-0.999 install &&
+ln -v -s ../../doc/xsane-0.999 /usr/share/sane/xsane/doc
+ln -v -s <browser> /usr/bin/netscape
+ln -v -s /usr/bin/xsane /usr/lib/gimp/2.0/plug-ins/
+
+#End scripts

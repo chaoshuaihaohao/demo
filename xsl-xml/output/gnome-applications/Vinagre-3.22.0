@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+sed -e '/_VinagreVnc/i gboolean scaling_command_line;' \
+    -i plugins/vnc/vinagre-vnc-connection.c &&
+sed -e '/scaling_/s/^/extern /' \
+    -i plugins/vnc/vinagre-vnc-connection.h
+./configure --prefix=/usr \
+            --enable-compile-warnings=minimum &&
+make
+make install
+
+#End scripts

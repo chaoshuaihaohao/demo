@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 22 fcron &&
+useradd -d /dev/null -c "Fcron User" -g fcron -s /bin/false -u 22 fcron
+find doc -type f -exec sed -i 's:/usr/local::g' {} \;
+./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --localstatedir=/var   \
+            --without-sendmail     \
+            --with-piddir=/run     \
+            --with-boot-install=no &&
+make
+make install
+
+#End scripts

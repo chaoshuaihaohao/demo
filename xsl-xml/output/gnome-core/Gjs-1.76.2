@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir gjs-build &&
+cd    gjs-build &&
+
+meson setup --prefix=/usr          \
+            --buildtype=release    \
+            --wrap-mode=nofallback \
+            ..                     &&
+ninja
+ninja install
+
+#End scripts

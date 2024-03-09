@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../libmusicbrainz-2.1.5-missing-includes-1.patch &&
+
+CXXFLAGS="${CXXFLAGS:--O2 -g} -std=c++98" \
+./configure --prefix=/usr --disable-static &&
+make
+(cd python && python2 setup.py build)
+make install &&
+install -v -m644 -D docs/mb_howto.txt \
+    /usr/share/doc/libmusicbrainz-2.1.5/mb_howto.txt
+(cd python && python2 setup.py install)
+
+#End scripts

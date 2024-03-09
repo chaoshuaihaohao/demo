@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+perl ./Build.PL &&
+./Build
+./Build install
+
+#End scripts

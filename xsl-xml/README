@@ -1,0 +1,9 @@
+
+#输出换行符
+<xsl:text>&#xA;</xsl:text>
+
+#'/'用于模糊路径匹配
+select="//chapter"/
+
+#@id  匹配chapter元素的id属性
+<xsl:for-each select="//chapter[@id='general-genutils']">

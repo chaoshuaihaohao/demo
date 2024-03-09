@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr          \
+            --disable-vcd          \
+            --with-external-dvdnav \
+            --docdir=/usr/share/doc/xine-lib-1.2.13 &&
+make
+doxygen doc/Doxyfile
+make install
+install -v -m755 -d /usr/share/doc/xine-lib-1.2.13/api &&
+install -v -m644    doc/api/* \
+                    /usr/share/doc/xine-lib-1.2.13/api
+
+#End scripts

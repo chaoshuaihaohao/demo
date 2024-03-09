@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --localstatedir=/var    \
+            --mandir=/usr/share/man \
+            --disable-static        &&
+make
+bin/tests/system/ifconfig.sh up
+make -k check
+bin/tests/system/ifconfig.sh down
+make install
+
+#End scripts

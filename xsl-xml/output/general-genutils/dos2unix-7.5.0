@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Start scripts
+make
+make install
+
+#End scripts

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../gnome-nettool-42.0-ping_and_netstat_fixes-1.patch
+sed -i '/merge_file/s/(.*/(/' data/meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release &&
+ninja
+ninja install
+
+#End scripts

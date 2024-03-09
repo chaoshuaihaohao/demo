@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's:"/desktop:"/org:' schema/*.xml &&
+
+./configure --prefix=/usr     \
+            --sysconfdir=/etc &&
+make
+make install
+
+#End scripts

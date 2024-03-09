@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+sed '/parse_version/d' -i src/linux/integration-test.py
+mkdir build                         &&
+cd    build                         &&
+meson setup ..            \
+      --prefix=/usr       \
+      --buildtype=release \
+      -Dgtk-doc=false     \
+      -Dman=false         &&
+ninja
+ninja install
+
+#End scripts

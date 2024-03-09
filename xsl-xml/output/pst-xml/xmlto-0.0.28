@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+LINKS="/usr/bin/links" \
+./configure --prefix=/usr &&
+
+make
+make install
+
+#End scripts

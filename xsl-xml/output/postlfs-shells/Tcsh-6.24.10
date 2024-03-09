@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr &&
+make
+make install install.man &&
+
+ln -v -sf tcsh   /bin/csh &&
+ln -v -sf tcsh.1 /usr/share/man/man1/csh.1
+
+#End scripts

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+make
+make PREFIX=/usr install &&
+
+rm -fv /usr/lib/libgif.a &&
+
+find doc \( -name Makefile\* -o -name \*.1 \
+         -o -name \*.xml \) -exec rm -v {} \; &&
+
+install -v -dm755 /usr/share/doc/giflib-5.2.1 &&
+cp -v -R doc/* /usr/share/doc/giflib-5.2.1
+
+#End scripts

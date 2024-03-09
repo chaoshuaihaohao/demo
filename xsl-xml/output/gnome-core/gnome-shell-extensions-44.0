@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr .. 
+ninja install
+
+#End scripts

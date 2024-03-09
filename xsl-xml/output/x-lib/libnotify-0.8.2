@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dgtk_doc=false     \
+            -Dman=false         \
+            ..                  &&
+ninja
+sed "/docs_dir =/s@\$@ / 'libnotify'@" \
+    -i ../docs/reference/meson.build   &&
+meson configure -Dgtk_doc=true         &&
+ninja
+ninja install &&
+mv -v /usr/share/doc/libnotify{,-0.8.2}
+
+#End scripts

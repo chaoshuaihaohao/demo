@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's%/usr/bin/python%&3%' tests/all-errors-documented.py
+PYTHON=/usr/bin/python3 ./configure --prefix=/usr          \
+                                    --enable-vala-bindings \
+                                    --disable-static       &&
+make
+make install
+
+#End scripts

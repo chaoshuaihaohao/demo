@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+sed 's/apiversion/soup_version/' -i docs/reference/meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr          \
+            --buildtype=release    \
+            -Dvapi=enabled         \
+            -Dgssapi=disabled      \
+            -Dsysprof=disabled     \
+            --wrap-mode=nofallback \
+            ..                     &&
+ninja
+ninja install
+
+#End scripts

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+bash Build.sh
+install -v pax /usr/bin &&
+install -v -m644 pax.1 /usr/share/man/man1
+
+#End scripts

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+make
+make prefix=/usr install                                 &&
+ln -sv -f traceroute /usr/bin/traceroute6                &&
+ln -sv -f traceroute.8 /usr/share/man/man8/traceroute6.8 &&
+rm -fv /usr/share/man/man1/traceroute.1
+
+#End scripts

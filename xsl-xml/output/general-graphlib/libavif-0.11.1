@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DAVIF_CODEC_AOM=ON         \
+      -DAVIF_BUILD_GDK_PIXBUF=ON  \
+      -G Ninja .. &&
+ninja
+ninja install
+gdk-pixbuf-query-loaders --update-cache
+
+#End scripts

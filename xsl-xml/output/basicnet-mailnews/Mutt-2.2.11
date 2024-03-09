@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 34 mail
+chgrp -v mail /var/mail
+sed  -e 's/ -with_backspaces//' \
+     -e 's/elinks/links/'       \
+     -e 's/-no-numbering -no-references//' \
+     -i doc/Makefile.in
+./configure --prefix=/usr                            \
+            --sysconfdir=/etc                        \
+            --with-docdir=/usr/share/doc/mutt-2.2.11 \
+            --with-ssl                               \
+            --enable-external-dotlock                \
+            --enable-pop                             \
+            --enable-imap                            \
+            --enable-hcache                          \
+            --enable-sidebar                         &&
+make
+make install
+
+#End scripts

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/install.*libaio.a/s/^/#/' src/Makefile
+make
+make install
+
+#End scripts

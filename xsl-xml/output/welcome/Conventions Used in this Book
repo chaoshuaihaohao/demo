@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr
+cat > $LFS/etc/group << "EOF"
+root:x:0:
+bin:x:1:
+......
+EOF
+
+#End scripts

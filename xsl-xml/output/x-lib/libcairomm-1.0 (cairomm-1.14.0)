@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+mkdir bld &&
+cd    bld &&
+
+meson setup ..            \
+      --prefix=/usr       \
+      --buildtype=release \
+      -Dbuild-tests=true  \
+      -Dboost-shared=true &&
+ninja
+ninja install
+
+#End scripts

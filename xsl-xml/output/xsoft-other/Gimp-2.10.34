@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --sysconfdir=/etc &&
+make
+make install
+ALL_LINGUAS="ca cs da de en en_GB es fa fr hr ko lt nl nn pt pt_BR ro sl sv uk zh_CN" \
+./autogen.sh --prefix=/usr
+make
+make install &&
+chown -R root:root /usr/share/gimp/2.0/help
+
+#End scripts

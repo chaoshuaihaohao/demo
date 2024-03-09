@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+make
+make PREFIX=/usr MANDIR=/usr/share/man install &&
+chmod -v 644 /usr/share/man/man1/tree.1
+
+#End scripts

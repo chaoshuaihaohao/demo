@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+sed -E '/^DOCKER_TEST/,/^SSHD_TEST/s/test_(auth_keyboard_info.* |hostkey |simple)/$(NOTHING)/' \
+    -i tests/Makefile.inc &&
+autoreconf -fi
+./configure --prefix=/usr          \
+            --disable-docker-tests \
+            --disable-static       &&
+make
+make install
+
+#End scripts

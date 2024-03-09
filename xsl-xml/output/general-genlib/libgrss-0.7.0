@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../libgrss-0.7.0-bugfixes-2.patch &&
+autoreconf -fv &&
+./configure --prefix=/usr --disable-static &&
+make
+make install
+
+#End scripts

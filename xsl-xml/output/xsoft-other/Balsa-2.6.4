@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../balsa-2.6.4-upstream_fixes-2.patch
+./configure --prefix=/usr            \
+            --sysconfdir=/etc        \
+            --localstatedir=/var/lib \
+            --without-html-widget    &&
+make
+make install
+
+#End scripts

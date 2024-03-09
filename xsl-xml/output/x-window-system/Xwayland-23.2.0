@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/install_man/,$d' meson.build &&
+
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=$XORG_PREFIX         \
+            --buildtype=release           \
+            -Dxkb_output_dir=/var/lib/xkb \
+            ..                            &&
+ninja
+mkdir tools &&
+pushd tools &&
+
+git clone https://gitlab.freedesktop.org/mesa/piglit.git --depth 1 &&
+cat > piglit/piglit.conf << EOF                                    &&
+[xts]
+path=$(pwd)/xts
+EOF
+
+git clone https://gitlab.freedesktop.org/xorg/test/xts --depth 1   &&
+
+export DISPLAY=:22           &&
+../hw/vfb/Xvfb $DISPLAY &
+VFB_PID=$!                   &&
+cd xts                       &&
+CFLAGS=-fcommon ./autogen.sh &&
+make                         &&
+kill $VFB_PID                &&
+unset DISPLAY VFB_PID        &&
+popd
+XTEST_DIR=$(pwd)/tools/xts PIGLIT_DIR=$(pwd)/tools/piglit ninja test
+ninja install
+install -vm755 hw/vfb/Xvfb /usr/bin
+
+#End scripts

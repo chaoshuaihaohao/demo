@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/LIBPOSTFIX="64"/s/64//' configure.ac &&
+
+./autogen.sh              &&
+./configure --prefix=/usr \
+            --docdir=/usr/share/doc/graphviz-8.1.0
+make
+make install
+
+#End scripts

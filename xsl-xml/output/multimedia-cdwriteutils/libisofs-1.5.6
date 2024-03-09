@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --disable-static &&
+make
+doxygen doc/doxygen.conf
+make install
+install -v -dm755 /usr/share/doc/libisofs-1.5.6 &&
+install -v -m644 doc/html/* /usr/share/doc/libisofs-1.5.6
+
+#End scripts

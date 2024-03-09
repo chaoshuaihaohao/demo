@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+head -n7 /proc/cpuinfo
+install -vdm755 /usr/lib/firmware/intel       &&
+cp -av -T --no-preserve=ownership sof-v*      \
+   /usr/lib/firmware/intel/sof                &&
+cp -av -T --no-preserve=ownership sof-tplg-v* \
+   /usr/lib/firmware/intel/sof-tplg
+install -vdm755 /usr/share/alsa &&
+cp -av -T --no-preserve=ownership ucm2 /usr/share/alsa/ucm2
+echo CONFIG_EXTRA_FIRMWARE='"'$({ cd /lib/firmware; echo amdgpu/* })'"' >> .config
+make oldconfig
+
+#End scripts

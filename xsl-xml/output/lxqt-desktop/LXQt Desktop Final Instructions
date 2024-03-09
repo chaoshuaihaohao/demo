@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+cat > ~/.xinitrc << "EOF"
+exec startlxqt
+EOF
+
+startx
+startx &> ~/.x-session-errors
+
+#End scripts

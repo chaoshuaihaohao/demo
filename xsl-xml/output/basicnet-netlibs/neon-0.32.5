@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr    \
+            --with-ssl       \
+            --enable-shared  \
+            --disable-static &&
+make
+make docs
+make install
+
+#End scripts

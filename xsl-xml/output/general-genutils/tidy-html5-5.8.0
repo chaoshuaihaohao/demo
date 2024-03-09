@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+cd build/cmake &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DBUILD_TAB2SPACE=ON        \
+      ../..    &&
+
+make
+make install &&
+rm -fv /usr/lib/libtidy.a &&
+install -v -m755 tab2space /usr/bin
+
+#End scripts

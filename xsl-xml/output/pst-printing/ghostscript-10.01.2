@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#Start scripts
+rm -rf freetype lcms2mt jpeg libpng openjpeg
+rm -rf zlib &&
+
+./configure --prefix=/usr           \
+            --disable-compile-inits \
+            --with-system-libtiff   &&
+make
+make so
+make install
+make soinstall &&
+install -v -m644 base/*.h /usr/include/ghostscript &&
+ln -sfvn ghostscript /usr/include/ps
+mv -v /usr/share/doc/ghostscript/10.01.2 /usr/share/doc/ghostscript-10.01.2  &&
+rm -rfv /usr/share/doc/ghostscript &&
+cp -r examples/ /usr/share/ghostscript/10.01.2/
+tar -xvf ../ghostscript-fonts-std-8.11.tar.gz -C /usr/share/ghostscript --no-same-owner &&
+tar -xvf ../gnu-gs-fonts-other-6.0.tar.gz     -C /usr/share/ghostscript --no-same-owner &&
+fc-cache -v /usr/share/ghostscript/fonts/
+gs -q -dBATCH /usr/share/ghostscript/10.01.2/examples/tiger.eps
+
+#End scripts

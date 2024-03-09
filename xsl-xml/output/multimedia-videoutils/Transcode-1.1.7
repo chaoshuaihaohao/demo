@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's|doc/transcode|&-$(PACKAGE_VERSION)|' \
+       $(find . -name Makefile.in -exec grep -l 'docsdir =' {} \;) &&
+
+patch -Np1 -i ../transcode-1.1.7-gcc10_fix-1.patch &&
+
+./configure --prefix=/usr     \
+            --enable-alsa     \
+            --enable-libmpeg2 \
+            --disable-ffmpeg  &&
+make
+make install
+
+#End scripts

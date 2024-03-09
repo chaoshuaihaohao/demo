@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+./configure &&
+make
+make doc
+make install
+install -v -d -m755 /usr/share/doc/alsa-lib-1.2.9/html/search &&
+install -v -m644 doc/doxygen/html/*.* \
+                /usr/share/doc/alsa-lib-1.2.9/html &&
+install -v -m644 doc/doxygen/html/search/* \
+                /usr/share/doc/alsa-lib-1.2.9/html/search
+
+#End scripts

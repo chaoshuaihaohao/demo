@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+CPPFLAGS+=" -I/opt/texlive/2023/include" \
+meson setup --prefix=/usr          \
+            --buildtype=release    \
+            -Dgtk_doc=false        \
+            --wrap-mode=nodownload \
+            ..                     &&
+ninja
+sed "/docs_dir/s@\$@ / 'evince-44.3'@" -i ../help/meson.build &&
+sed '/fatal-warnings/d' -i ../help/reference/*/meson.build    &&
+meson configure -Dgtk_doc=true                                &&
+ninja
+ninja install
+
+#End scripts

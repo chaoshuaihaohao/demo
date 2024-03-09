@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 87 ntp &&
+useradd -c "Network Time Protocol" -d /var/lib/ntp -u 87 \
+        -g ntp -s /bin/false ntp
+sed -e 's/"(\\S+)"/"?([^\\s"]+)"?/' \
+    -i scripts/update-leap/update-leap.in
+sed -e 's/#ifndef __sun/#if !defined(__sun) \&\& !defined(__GLIBC__)/' \
+    -i libntp/work_thread.c
+./configure --prefix=/usr         \
+            --bindir=/usr/sbin    \
+            --sysconfdir=/etc     \
+            --enable-linuxcaps    \
+            --with-lineeditlibs=readline \
+            --docdir=/usr/share/doc/ntp-4.2.8p17 &&
+make
+make install &&
+install -v -o ntp -g ntp -d /var/lib/ntp
+
+#End scripts

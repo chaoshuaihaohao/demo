@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+sed "/docdir =/s@\$@ / 'nautilus-44.2.1'@" -i meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dselinux=false     \
+            -Dpackagekit=false  \
+            ..                  &&
+
+ninja
+ninja install
+
+#End scripts

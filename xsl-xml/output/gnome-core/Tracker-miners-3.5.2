@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dman=false         \
+            ..                  &&
+ninja
+dbus-run-session env TRACKER_TESTS_AWAIT_TIMEOUT=20 ninja test &&
+rm -rf ~/tracker-tests
+ninja install
+
+#End scripts

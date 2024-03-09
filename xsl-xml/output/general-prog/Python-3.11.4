@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+CXX="/usr/bin/g++"               \
+./configure --prefix=/usr        \
+            --enable-shared      \
+            --with-system-expat  \
+            --with-system-ffi    \
+            --enable-optimizations &&
+make
+make install
+install -v -dm755 /usr/share/doc/python-3.11.4/html
+
+tar --strip-components=1  \
+    --no-same-owner       \
+    --no-same-permissions \
+    -C /usr/share/doc/python-3.11.4/html \
+    -xvf ../python-3.11.4-docs-html.tar.bz2
+ln -svfn python-3.11.4 /usr/share/doc/python-3
+export PYTHONDOCS=/usr/share/doc/python-3/html
+
+#End scripts

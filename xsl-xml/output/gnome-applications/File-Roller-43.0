@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dpackagekit=false  \
+            ..                  &&
+ninja
+ninja install &&
+chmod -v 0755 /usr/libexec/file-roller/isoinfo.sh
+
+#End scripts

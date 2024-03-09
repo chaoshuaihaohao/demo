@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+sed -e '/#include <stdlib.h>/a #include <string>' -i src/api-device.cc &&
+
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$XORG_PREFIX .. &&
+make
+make install
+echo "export VDPAU_DRIVER=va_gl" >> /etc/profile.d/xorg.sh
+
+#End scripts

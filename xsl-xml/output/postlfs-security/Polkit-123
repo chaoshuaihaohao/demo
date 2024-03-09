@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -fg 27 polkitd &&
+useradd -c "PolicyKit Daemon Owner" -d /etc/polkit-1 -u 27 \
+        -g polkitd -s /bin/false polkitd
+sed -e 's/JS_Init/JS::DisableJitBackend(); &/' \
+    -i src/polkitbackend/polkitbackendjsauthority.cpp
+mkdir build &&
+cd    build &&
+
+meson setup ..                            \
+      --prefix=/usr                       \
+      --buildtype=release                 \
+      -Dman=true                          \
+      -Dsession_tracking=libsystemd-login \
+      -Dtests=true                        &&
+ninja
+ninja install
+
+#End scripts

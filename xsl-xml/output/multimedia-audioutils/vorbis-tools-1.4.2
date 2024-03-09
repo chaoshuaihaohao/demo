@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr \
+            --enable-vcut \
+            --without-curl &&
+make
+make install
+
+#End scripts

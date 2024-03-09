@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+sed 's@symlink usr/lib64@ro-bind-try /lib64@' -i ../tests/libtest.sh
+ninja install
+
+#End scripts

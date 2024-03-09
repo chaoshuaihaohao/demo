@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr         \
+            --sysconfdir=/etc     \
+            --localstatedir=/var  \
+            --disable-manpages    \
+            --enable-library      &&
+make
+make install &&
+ln -svf ../libexec/bluetooth/bluetoothd /usr/sbin
+install -v -dm755 /etc/bluetooth &&
+install -v -m644 src/main.conf /etc/bluetooth/main.conf
+install -v -dm755 /usr/share/doc/bluez-5.68 &&
+install -v -m644 doc/*.txt /usr/share/doc/bluez-5.68
+
+#End scripts

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's/python/&3/' tests/Makefile.in         &&
+./configure                                     \
+    --bindir=$TEXLIVE_PREFIX/bin/${TEXARCH}     \
+    --mandir=$TEXLIVE_PREFIX/texmf-dist/doc/man \
+    --with-kpathsea=$TEXLIVE_PREFIX             &&
+make
+make install
+
+#End scripts

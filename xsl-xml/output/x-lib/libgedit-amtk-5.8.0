@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir amtk-build &&
+cd    amtk-build &&
+
+meson setup ..              \
+      --prefix=/usr         \
+      --buildtype=release   \
+      -Dgtk_doc=false       &&
+ninja
+ninja install
+
+#End scripts

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's/getline/get_line/' src/*.[ch]                   &&
+patch -Np1 -i ../procmail-3.22-consolidated_fixes-1.patch &&
+
+make LOCKINGTEST=/tmp MANDIR=/usr/share/man install       &&
+make install-suid
+
+#End scripts

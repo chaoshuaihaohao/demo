@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+sed -i "/INSTALL.*gz/s/.gz//" Makefile &&
+make
+make install
+
+#End scripts

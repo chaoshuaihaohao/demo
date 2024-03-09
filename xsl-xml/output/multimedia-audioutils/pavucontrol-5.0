@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --docdir=/usr/share/doc/pavucontrol-5.0 &&
+make
+make install
+
+#End scripts

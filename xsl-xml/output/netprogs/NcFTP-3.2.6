@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's/^Bookmark/extern Bookmark/' sh_util/gpshare.c
+patch -Np1 -i ../ncftp-3.2.6-configure_fixes-1.patch &&
+autoreconf -fiv -I autoconf_local
+./configure --prefix=/usr --sysconfdir=/etc &&
+make -C libncftp shared &&
+make
+make -C libncftp soinstall &&
+make install
+./configure --prefix=/usr --sysconfdir=/etc &&
+make
+make install
+
+#End scripts

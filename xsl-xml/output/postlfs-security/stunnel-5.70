@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+groupadd -g 51 stunnel &&
+useradd -c "stunnel Daemon" -d /var/lib/stunnel \
+        -g stunnel -s /bin/false -u 51 stunnel
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --localstatedir=/var &&
+make
+make docdir=/usr/share/doc/stunnel-5.70 install
+install -v -m644 tools/stunnel.service /usr/lib/systemd/system
+make cert
+
+#End scripts

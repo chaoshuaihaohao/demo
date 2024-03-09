@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dgtk2=true         \
+            -Dgtk4=true         \
+            -Dvapi=true         \
+            -Ddocs=false        \
+            -Dman=false         \
+            ..                  &&
+ninja
+ninja install
+
+#End scripts

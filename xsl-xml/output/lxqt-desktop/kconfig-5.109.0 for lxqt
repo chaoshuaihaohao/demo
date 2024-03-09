@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+mkdir -v build &&
+cd       build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -DCMAKE_INSTALL_LIBDIR=lib  \
+      -DBUILD_TESTING=OFF         \
+      -Wno-dev ..                 &&
+make
+make install
+rm -rf /usr/mkspecs &&
+rm -rf /usr/lib/libexec
+
+#End scripts

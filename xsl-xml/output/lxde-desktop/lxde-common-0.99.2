@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --sysconfdir=/etc &&
+make
+make install
+update-mime-database /usr/share/mime &&
+gtk-update-icon-cache -qf /usr/share/icons/hicolor &&
+update-desktop-database -q
+cat > ~/.xinitrc << "EOF"
+# No need to run dbus-launch, since it is run by startlxde
+startlxde
+EOF
+
+startx
+startx &> ~/.x-session-errors
+
+#End scripts

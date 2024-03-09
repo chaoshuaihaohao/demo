@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Start scripts
+mkdir -p                /usr/share/unicode/ucd &&
+unzip -uo ../UCD.zip -d /usr/share/unicode/ucd
+sed -i 's@/desktop/ibus@/org/freedesktop/ibus@g' \
+    data/dconf/org.freedesktop.ibus.gschema.xml
+./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --disable-python2      \
+            --disable-emoji-dict   \
+            --disable-unicode-dict &&
+rm -f tools/main.c                 &&
+make
+make install &&
+gzip -dfv /usr/share/man/man{{1,5}/ibus*.gz,5/00-upstream-settings.5.gz}
+gtk-query-immodules-3.0 --update-cache
+
+#End scripts

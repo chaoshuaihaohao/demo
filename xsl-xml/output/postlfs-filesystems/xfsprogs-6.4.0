@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+make DEBUG=-DNDEBUG     \
+     INSTALL_USER=root  \
+     INSTALL_GROUP=root
+make PKG_DOC_DIR=/usr/share/doc/xfsprogs-6.4.0 install     &&
+make PKG_DOC_DIR=/usr/share/doc/xfsprogs-6.4.0 install-dev &&
+
+rm -rfv /usr/lib/libhandle.{a,la}
+
+#End scripts

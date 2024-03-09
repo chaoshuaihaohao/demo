@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's/env python/&3/' SCons/Utilities/*.py &&
+
+python3 setup.py install --prefix=/usr \
+                         --optimize=1  &&
+
+mv -v /usr/lib/python3.11/site-packages/SCons-4.5.2-py3.11.egg/*.1 \
+      /usr/share/man/man1
+
+#End scripts

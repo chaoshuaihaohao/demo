@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --sbindir=/usr/sbin    \
+            --disable-nfsv4        \
+            --disable-gss          \
+            LIBS="-lsqlite3 -levent_core" &&
+make
+make install                       &&
+chmod u+w,go+r /usr/sbin/mount.nfs &&
+chown nobody:nogroup /var/lib/nfs
+make check
+
+#End scripts

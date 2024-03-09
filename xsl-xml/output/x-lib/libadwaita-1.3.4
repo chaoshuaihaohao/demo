@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+sed "s/apiversion/'1.3.4'/" -i ../doc/meson.build &&
+meson configure -Dgtk_doc=true                    &&
+ninja
+ninja install
+
+#End scripts

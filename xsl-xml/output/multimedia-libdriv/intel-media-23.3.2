@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=$XORG_PREFIX \
+      -DINSTALL_DRIVER_SYSCONF=OFF        \
+      -DBUILD_TYPE=Release                \
+      -Wno-dev ..                   &&
+make
+make install
+
+#End scripts

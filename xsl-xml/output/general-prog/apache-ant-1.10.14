@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./bootstrap.sh
+bootstrap/bin/ant -f fetch.xml -Ddest=optional
+./build.sh -Ddist.dir=$PWD/ant-1.10.14 dist
+cp -rv ant-1.10.14 /opt/            &&
+chown -R root:root /opt/ant-1.10.14 &&
+ln -sfv ant-1.10.14 /opt/ant
+
+#End scripts

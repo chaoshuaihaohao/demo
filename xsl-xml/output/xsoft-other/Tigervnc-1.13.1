@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../tigervnc-1.13.1-configuration_fixes-1.patch
+# Put code in place
+mkdir -p unix/xserver &&
+tar -xf ../xorg-server-21.1.6.tar.xz \
+    --strip-components=1              \
+    -C unix/xserver                   &&
+( cd unix/xserver &&
+  patch -Np1 -i ../xserver21.1.1.patch ) &&
+
+# Build viewer
+cmake -G "Unix Makefiles"         \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release  \
+      -Wno-dev . &&
+make &&
+
+# Build server
+pushd unix/xserver &&
+  autoreconf -fiv  &&
+
+  CPPFLAGS="-I/usr/include/drm"       \
+  ./configure $XORG_CONFIG            \
+      --disable-xwayland    --disable-dri        --disable-dmx         \
+      --disable-xorg        --disable-xnest      --disable-xvfb        \
+      --disable-xwin        --disable-xephyr     --disable-kdrive      \
+      --disable-devel-docs  --disable-config-hal --disable-config-udev \
+      --disable-unit-tests  --disable-selective-werror                 \
+      --disable-static      --enable-dri3                              \
+      --without-dtrace      --enable-dri2        --enable-glx          \
+      --with-pic &&
+  make  &&
+popd
+#Install viewer
+make install &&
+
+#Install server
+( cd unix/xserver/hw/vnc && make install ) &&
+
+[ -e /usr/bin/Xvnc ] || ln -svf $XORG_PREFIX/bin/Xvnc /usr/bin/Xvnc
+install -vdm755 /etc/X11/tigervnc &&
+install -v -m755 ../Xsession /etc/X11/tigervnc
+echo ":1=$(whoami)" >> /etc/tigervnc/vncserver.users
+install -vdm 755 ~/.vnc &&
+cat > ~/.vnc/config << EOF
+# Begin ~/.vnc/config
+# The session must match one listed in /usr/share/xsessions.
+# Ensure that there are no spaces at the end of the lines.
+
+session=LXDE
+geometry=1024x768
+
+# End ~/.vnc/config
+EOF
+systemctl start vncserver@:1
+systemctl enable vncserver@:1
+
+#End scripts

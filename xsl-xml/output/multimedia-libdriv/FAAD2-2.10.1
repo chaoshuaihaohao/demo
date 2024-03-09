@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./bootstrap                                &&
+./configure --prefix=/usr --disable-static &&
+make
+./frontend/faad -o sample.wav ../sample.aac
+aplay sample.wav
+make install
+
+#End scripts

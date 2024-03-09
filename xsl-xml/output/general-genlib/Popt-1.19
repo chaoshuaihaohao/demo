@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --disable-static &&
+make
+sed -i 's@\./@src/@' Doxyfile &&
+doxygen
+make install
+install -v -m755 -d /usr/share/doc/popt-1.19 &&
+install -v -m644 doxygen/html/* /usr/share/doc/popt-1.19
+
+#End scripts

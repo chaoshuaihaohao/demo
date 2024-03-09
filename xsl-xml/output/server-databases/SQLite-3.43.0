@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+unzip -q ../sqlite-doc-3430000.zip
+./configure --prefix=/usr     \
+            --disable-static  \
+            --enable-fts{4,5} \
+            CPPFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA=1 \
+                      -DSQLITE_ENABLE_UNLOCK_NOTIFY=1   \
+                      -DSQLITE_ENABLE_DBSTAT_VTAB=1     \
+                      -DSQLITE_SECURE_DELETE=1          \
+                      -DSQLITE_ENABLE_FTS3_TOKENIZER=1" &&
+make
+make install
+install -v -m755 -d /usr/share/doc/sqlite-3.43.0 &&
+cp -v -R sqlite-doc-3430000/* /usr/share/doc/sqlite-3.43.0
+
+#End scripts

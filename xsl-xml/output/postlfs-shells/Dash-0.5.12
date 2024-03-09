@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+./configure --bindir=/bin --mandir=/usr/share/man &&
+make
+make install
+ln -svf dash /bin/sh
+
+#End scripts

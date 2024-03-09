@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../audiofile-0.3.6-consolidated_patches-1.patch &&
+autoreconf -fiv                             &&
+
+./configure --prefix=/usr --disable-static  &&
+
+make
+make install
+
+#End scripts

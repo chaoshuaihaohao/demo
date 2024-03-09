@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#Start scripts
+patch -Np1 -i ../ffmpeg-6.0-chromium_method-1.patch
+patch -Np1 -i ../ffmpeg-6.0-binutils_2.41-1.patch
+./configure --prefix=/usr        \
+            --enable-gpl         \
+            --enable-version3    \
+            --enable-nonfree     \
+            --disable-static     \
+            --enable-shared      \
+            --disable-debug      \
+            --enable-libaom      \
+            --enable-libass      \
+            --enable-libfdk-aac  \
+            --enable-libfreetype \
+            --enable-libmp3lame  \
+            --enable-libopus     \
+            --enable-libtheora   \
+            --enable-libvorbis   \
+            --enable-libvpx      \
+            --enable-libx264     \
+            --enable-libx265     \
+            --enable-openssl     \
+            --docdir=/usr/share/doc/ffmpeg-6.0 &&
+
+make &&
+
+gcc tools/qt-faststart.c -o tools/qt-faststart
+pushd doc &&
+for DOCNAME in `basename -s .html *.html`
+do
+    texi2pdf -b $DOCNAME.texi &&
+    texi2dvi -b $DOCNAME.texi &&
+
+    dvips    -o $DOCNAME.ps   \
+                $DOCNAME.dvi
+done &&
+popd &&
+unset DOCNAME
+doxygen doc/Doxyfile
+make install &&
+
+install -v -m755    tools/qt-faststart /usr/bin &&
+install -v -m755 -d           /usr/share/doc/ffmpeg-6.0 &&
+install -v -m644    doc/*.txt /usr/share/doc/ffmpeg-6.0
+install -v -m644 doc/*.pdf /usr/share/doc/ffmpeg-6.0 &&
+install -v -m644 doc/*.ps  /usr/share/doc/ffmpeg-6.0
+install -v -m755 -d /usr/share/doc/ffmpeg-6.0/api                     &&
+cp -vr doc/doxy/html/* /usr/share/doc/ffmpeg-6.0/api                  &&
+find /usr/share/doc/ffmpeg-6.0/api -type f -exec chmod -c 0644 \{} \; &&
+find /usr/share/doc/ffmpeg-6.0/api -type d -exec chmod -c 0755 \{} \;
+make fate-rsync SAMPLES=fate-suite/
+rsync -vrltLW  --delete --timeout=60 --contimeout=60 \
+      rsync://fate-suite.ffmpeg.org/fate-suite/ fate-suite/
+make fate THREADS=N SAMPLES=fate-suite/ | tee ../fate.log &&
+grep ^TEST ../fate.log | wc -l
+
+#End scripts

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+sed -i 's#) ytasm.*#)#' Makefile.in &&
+
+./configure --prefix=/usr &&
+make
+make install
+
+#End scripts

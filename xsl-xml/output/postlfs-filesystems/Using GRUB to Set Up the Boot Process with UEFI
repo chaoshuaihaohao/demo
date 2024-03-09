@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#Start scripts
+mkfs.vfat /dev/sdx1
+fdisk /dev/sdx
+t
+1
+uefi
+w
+mount --mkdir -v -t vfat /dev/sdx1 -o codepage=437,iocharset=iso8859-1 \
+      /mnt/rescue
+grub-install --target=x86_64-efi --removable \
+             --efi-directory=/mnt/rescue --boot-directory=/mnt/rescue
+umount /mnt/rescue
+fdisk -l /dev/sda
+mount --mkdir -v -t vfat /dev/sda1 -o codepage=437,iocharset=iso8859-1 \
+      /boot/efi
+cat >> /etc/fstab << EOF
+EOF
+grub-install --target=x86_64-efi --removable
+mountpoint /sys/firmware/efi/efivars || mount -v -t efivarfs efivarfs /sys/firmware/efi/efivars
+grub-install --bootloader-id=LFS --recheck
+cat > /boot/grub/grub.cfg << EOF
+EOF
+cat >> /boot/grub/grub.cfg << EOF
+EOF
+
+#End scripts

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr              \
+            --buildtype=release        \
+            -Dtests=false              \
+            -Dprofiler=false           \
+            ..                         &&
+ninja
+ninja install
+sed 's/zenity --[a-z]*/gtk4-demo/' -i ../src/tests/x11-test.sh
+HOME= ninja test
+mutter --wayland -- vte-2.91
+MUTTER_DEBUG_DUMMY_MODE_SPECS=1920x1080 mutter --wayland --nested -- vte-2.91
+
+#End scripts

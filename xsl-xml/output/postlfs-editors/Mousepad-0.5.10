@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --enable-keyfile-settings &&
+make
+make install
+
+#End scripts

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+autoreconf -fiv              &&
+./configure --prefix=/usr    \
+            --enable-jpeg    \
+            --enable-jasper  \
+            --enable-lcms    \
+            --disable-static \
+            --docdir=/usr/share/doc/libraw-0.21.1 &&
+make
+make install
+
+#End scripts

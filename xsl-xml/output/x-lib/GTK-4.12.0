@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+sed -e '/glib-object.h/a #include <gdk/gdk.h>'        \
+    -e '/ gtk_printer_option/i GDK_AVAILABLE_IN_ALL'  \
+    -e '/\*gtk_printer_option/i GDK_AVAILABLE_IN_ALL' \
+    -i.orig gtk/print/gtkprinteroptionprivate.h
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr           \
+            --buildtype=release     \
+            -Dbroadway-backend=true \
+            -Dintrospection=enabled \
+            .. &&
+ninja
+sed "s@'doc'@& / 'gtk-4.12.0'@" -i ../docs/reference/meson.build &&
+meson configure -Dgtk_doc=true                                   &&
+ninja
+ninja install
+
+#End scripts

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd build &&
+
+../configure --prefix=/usr --disable-gpg-test &&
+make
+make install
+
+#End scripts

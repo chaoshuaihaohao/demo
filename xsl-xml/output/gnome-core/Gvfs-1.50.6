@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup               \
+      --prefix=/usr       \
+      --buildtype=release \
+      -Dfuse=false        \
+      -Dgphoto2=false     \
+      -Dafc=false         \
+      -Dbluray=false      \
+      -Dnfs=false         \
+      -Dmtp=false         \
+      -Dsmb=false         \
+      -Ddnssd=false       \
+      -Dgoa=false         \
+      -Dgoogle=false      .. &&
+ninja
+ninja install
+
+#End scripts

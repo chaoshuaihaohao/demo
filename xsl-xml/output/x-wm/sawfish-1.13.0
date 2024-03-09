@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --with-pango  &&
+make
+make install
+rm -v /usr/share/xsessions/sawfish-*.desktop
+
+#End scripts

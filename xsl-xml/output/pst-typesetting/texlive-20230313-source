@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#Start scripts
+export TEXARCH=$(uname -m | sed -e 's/i.86/i386/' -e 's/$/-linux/') &&
+
+patch -Np1 -i ../texlive-20230313-source-security_fix-1.patch &&
+
+mkdir texlive-build &&
+cd    texlive-build &&
+
+../configure -C                                   \
+    --prefix=$TEXLIVE_PREFIX                      \
+    --bindir=$TEXLIVE_PREFIX/bin/$TEXARCH         \
+    --datarootdir=$TEXLIVE_PREFIX                 \
+    --includedir=$TEXLIVE_PREFIX/include          \
+    --infodir=$TEXLIVE_PREFIX/texmf-dist/doc/info \
+    --libdir=$TEXLIVE_PREFIX/lib                  \
+    --mandir=$TEXLIVE_PREFIX/texmf-dist/doc/man   \
+    --disable-native-texlive-build                \
+    --disable-static --enable-shared              \
+    --disable-dvisvgm                             \
+    --with-system-cairo                           \
+    --with-system-fontconfig                      \
+    --with-system-freetype2                       \
+    --with-system-gmp                             \
+    --with-system-graphite2                       \
+    --with-system-harfbuzz                        \
+    --with-system-icu                             \
+    --with-system-libgs                           \
+    --with-system-libpaper                        \
+    --with-system-libpng                          \
+    --with-system-mpfr                            \
+    --with-system-pixman                          \
+    --with-system-zlib                            \
+    --with-banner-add=" - BLFS" &&
+
+make
+make install-strip &&
+/sbin/ldconfig     &&
+make texlinks      &&
+mkdir -pv                                $TEXLIVE_PREFIX/tlpkg/TeXLive/ &&
+install -v -m644 ../texk/tests/TeXLive/* $TEXLIVE_PREFIX/tlpkg/TeXLive/ &&
+tar -xf ../../texlive-20230311-tlpdb-full.tar.gz -C $TEXLIVE_PREFIX/tlpkg
+tar -xf ../../texlive-20230313-texmf.tar.xz -C $TEXLIVE_PREFIX --strip-components=1
+for F in $TEXLIVE_PREFIX/texmf-dist/scripts/latex-make/*.py ; do
+  sed -i 's%/usr/bin/env python%/usr/bin/python3%' $F
+done
+
+mktexlsr &&
+fmtutil-sys --all
+ln -svf $TEXLIVE_PREFIX/lib/libkpathsea.so /usr/lib
+sed -e '/local template=\[\[--ini/s/\(primaryflags%\)\(.*\)/\1 --socket --shell-escape \2/' \
+ -e '/local template=\[\[%primaryflags%/s/\(primaryflags%\)\(.*\)/\1 --socket --shell-escape \2/' \
+  -i $TEXLIVE_PREFIX/texmf-dist/scripts/context/lua/mtxrun.lua &&
+
+mkdir -pv $TEXLIVE_PREFIX/texmf-var/luatex-cache/context/ &&
+
+ln -sfv /$TEXLIVE_PREFIX/texmf-dist/scripts/context/lua/mtxrun.lua \
+        /$TEXLIVE_PREFIX/bin/$TEXARCH/mtxrun &&
+
+cat > $TEXLIVE_PREFIX/bin/$TEXARCH/context << EOF
+#!/bin/sh
+export TEXMF=$TEXLIVE_PREFIX/texmf-dist;
+export TEXMFCNF=$TEXLIVE_PREFIX/texmf-dist/web2c;
+export TEXMFCACHE=$TEXLIVE_PREFIX/texmf-var/luatex-cache/context/;
+$TEXLIVE_PREFIX/bin/$TEXARCH/mtxrun --script context "\$@"
+EOF
+chmod -v 0755 $TEXLIVE_PREFIX/bin/$TEXARCH/context
+
+#End scripts

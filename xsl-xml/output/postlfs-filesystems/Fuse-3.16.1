@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/^udev/,$ s/^/#/' util/meson.build &&
+
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+pushd .. &&
+  doxygen doc/Doxyfile &&
+popd
+python3 -m venv --system-site-packages testenv &&
+source testenv/bin/activate                    &&
+pip3 install looseversion                      &&
+python3 -m pytest                              &&
+deactivate
+ninja install                  &&
+chmod u+s /usr/bin/fusermount3 &&
+
+cd ..                          &&
+cp -Rv doc/html -T /usr/share/doc/fuse-3.16.1 &&
+install -v -m644   doc/{README.NFS,kernel.txt} \
+                   /usr/share/doc/fuse-3.16.1
+
+#End scripts

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+sed -i '/merge_file/{n;d}' data/meson.build
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --disable-legacy-sm &&
+make
+make install
+update-desktop-database &&
+update-mime-database /usr/share/mime
+cat > ~/.xinitrc << "EOF"
+dbus-launch --exit-with-x11 startxfce4
+EOF
+
+startx
+startx &> ~/.x-session-errors
+
+#End scripts

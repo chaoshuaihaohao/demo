@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --docdir=/usr/share/doc/bluefish-2.2.14 &&
+make
+make install
+
+#End scripts

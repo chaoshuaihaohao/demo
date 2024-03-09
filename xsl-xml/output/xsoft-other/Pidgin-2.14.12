@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --with-gstreamer=1.0 \
+            --disable-avahi      \
+            --disable-gtkspell   \
+            --disable-meanwhile  \
+            --disable-idn        \
+            --disable-nm         \
+            --disable-tk         \
+            --disable-vv         &&
+make
+make docs
+make install &&
+mkdir -pv /usr/share/doc/pidgin-2.14.12 &&
+cp -v README doc/gtkrc-2.0 /usr/share/doc/pidgin-2.14.12
+mkdir -pv /usr/share/doc/pidgin-2.14.12/api &&
+cp -rv doc/html/* /usr/share/doc/pidgin-2.14.12/api
+
+#End scripts

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Start scripts
+sed -i -r 's:"(/apps):"/org/gnome\1:' data/*.xml &&
+
+sed -i "s/'2.3.0'/'2.3.0', '2.4.0'/" meson.build &&
+
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release .. &&
+ninja
+ninja install
+
+#End scripts

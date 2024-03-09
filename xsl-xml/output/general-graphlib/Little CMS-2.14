@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+sed '/BufferSize < TagSize/,+1 s/goto Error/TagSize = BufferSize/' \
+    -i src/cmsio0.c
+./configure --prefix=/usr --disable-static &&
+make
+make install
+
+#End scripts

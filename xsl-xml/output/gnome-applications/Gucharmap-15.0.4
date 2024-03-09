@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build                   &&
+cd    build                   &&
+mkdir ucd                     &&
+pushd ucd                     &&
+  unzip ../../../UCD.zip      &&
+  cp -v ../../../Unihan.zip . &&
+popd                          &&
+
+meson setup --prefix=/usr       \
+            --strip             \
+            --buildtype=release \
+            -Ducd_path=./ucd    \
+            -Ddocs=false        \
+            ..                  &&
+ninja
+rm  -fv /usr/share/glib-2.0/schemas/org.gnome.Charmap.enums.xml &&
+ninja install
+
+#End scripts

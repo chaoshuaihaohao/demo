@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr     \
+            --sysconfdir=/etc \
+            --enable-dbus     &&
+make
+make install
+
+#End scripts

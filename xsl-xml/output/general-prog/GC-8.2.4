@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr      \
+            --enable-cplusplus \
+            --disable-static   \
+            --docdir=/usr/share/doc/gc-8.2.4 &&
+make
+make install &&
+install -v -m644 doc/gc.man /usr/share/man/man3/gc_malloc.3
+
+#End scripts

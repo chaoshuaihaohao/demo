@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr      \
+            --enable-shared    \
+            --without-valgrind \
+            --without-baseruby \
+            --docdir=/usr/share/doc/ruby-3.2.2 &&
+make
+make capi
+make install
+
+#End scripts

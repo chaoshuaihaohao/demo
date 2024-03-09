@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#Start scripts
+./configure --prefix=/usr --disable-static &&
+make
+make html
+make install
+mkdir                   /usr/share/doc/gsl-2.7.1 &&
+cp -R doc/_build/html/* /usr/share/doc/gsl-2.7.1
+
+#End scripts

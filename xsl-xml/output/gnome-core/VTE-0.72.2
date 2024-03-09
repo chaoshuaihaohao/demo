@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release -Dfribidi=false .. &&
+ninja
+sed -e "/docdir =/s@\$@/ 'vte-0.72.2'@" \
+    -e "/fatal-warnings/d"              \
+    -i ../doc/reference/meson.build     &&
+meson configure -Ddocs=true             &&
+ninja
+ninja install &&
+rm -v /etc/profile.d/vte.*
+
+#End scripts

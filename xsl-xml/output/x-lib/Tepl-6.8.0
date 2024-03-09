@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Start scripts
+mkdir tepl-build &&
+cd    tepl-build &&
+
+meson setup --prefix=/usr       \
+            --buildtype=release \
+            -Dgtk_doc=false     \
+            .. &&
+ninja
+ninja install
+
+#End scripts

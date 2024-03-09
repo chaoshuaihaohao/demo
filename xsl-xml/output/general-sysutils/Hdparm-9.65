@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Start scripts
+make
+make binprefix=/usr install
+
+#End scripts

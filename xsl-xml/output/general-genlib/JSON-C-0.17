@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Start scripts
+mkdir build &&
+cd    build &&
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_STATIC_LIBS=OFF    \
+      .. &&
+make
+doxygen doc/Doxyfile
+make install
+install -d -vm755 /usr/share/doc/json-c-0.17 &&
+install -v -m644 doc/html/* /usr/share/doc/json-c-0.17
+
+#End scripts

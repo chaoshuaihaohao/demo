@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Start scripts
+tar -xf ../xdgmime.tar.xz &&
+make -C xdgmime
+mkdir build &&
+cd    build &&
+
+meson setup --prefix=/usr --buildtype=release -Dupdate-mimedb=true .. &&
+ninja
+ninja install
+
+#End scripts

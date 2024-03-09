@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#Start scripts
+./configure  --prefix=/usr               \
+             --libexecdir=/usr/lib/xfce4 \
+             --docdir=/usr/share/doc/xarchiver-0.5.4.21 &&
+make
+make install
+
+#End scripts
